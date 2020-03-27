@@ -1,4 +1,4 @@
-From 26d8000235eacebdafe496d58693510d76e07cb9 Mon Sep 17 00:00:00 2001
+From 50e50add6c75da195a9bc0cb4060f5e80a23de74 Mon Sep 17 00:00:00 2001
 From: Dexter Chua <dalcde@yahoo.com.hk>
 Date: Sun, 22 Mar 2020 17:20:00 +0800
 Subject: [PATCH 3/4] Add NotesRenderer
@@ -22,7 +22,7 @@ The katex version is 0.11.1
  .../NotesRenderer/Templates/Footnotes.jinja2s |  11 +
  .../NotesRenderer/Templates/Index.jinja2s     |  41 ++
  .../NotesRenderer/Templates/Lists.jinja2s     |  21 +
- .../NotesRenderer/Templates/Math.jinja2s      |  17 +
+ .../NotesRenderer/Templates/Math.jinja2s      |  15 +
  .../NotesRenderer/Templates/Misc.jinja2s      |  20 +
  .../NotesRenderer/Templates/Pictures.jinja2s  |  10 +
  .../Templates/Primitives.jinja2s              |  12 +
@@ -60,7 +60,7 @@ The katex version is 0.11.1
  plasTeX/Renderers/NotesRenderer/katex.min.js  |   1 +
  plasTeX/Renderers/NotesRenderer/layout.jinja2 | 103 +++
  plasTeX/Renderers/NotesRenderer/style.css     | 627 ++++++++++++++++++
- 53 files changed, 1875 insertions(+)
+ 53 files changed, 1873 insertions(+)
  create mode 100644 plasTeX/Renderers/NotesRenderer/Config.py
  create mode 100644 plasTeX/Renderers/NotesRenderer/README.md
  create mode 100644 plasTeX/Renderers/NotesRenderer/TODO
@@ -546,10 +546,10 @@ index 0000000..6f387ee
 +</dl>
 diff --git a/plasTeX/Renderers/NotesRenderer/Templates/Math.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/Math.jinja2s
 new file mode 100644
-index 0000000..c2b1d4b
+index 0000000..8afcf4e
 --- /dev/null
 +++ b/plasTeX/Renderers/NotesRenderer/Templates/Math.jinja2s
-@@ -0,0 +1,17 @@
+@@ -0,0 +1,15 @@
 +name: math
 +{{ obj.inlineMath }}
 +
@@ -562,10 +562,8 @@ index 0000000..c2b1d4b
 +
 +name: equation
 +<div class="equation" id="{{ obj.id }}">
-+<p>
-+  <span class="equation_label">{{ obj.ref }}</span>
-+  {{ obj.displayMath }}
-+</p>
++  <div class="equation_content">{{ obj.displayMath }}</div>
++  <span class="equation_label">( {{ obj.ref }} )</span>
 +</div>
 diff --git a/plasTeX/Renderers/NotesRenderer/Templates/Misc.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/Misc.jinja2s
 new file mode 100644
@@ -1678,7 +1676,7 @@ index 0000000..d36d316
 +</html>
 diff --git a/plasTeX/Renderers/NotesRenderer/style.css b/plasTeX/Renderers/NotesRenderer/style.css
 new file mode 100644
-index 0000000..0243c7d
+index 0000000..794ec04
 --- /dev/null
 +++ b/plasTeX/Renderers/NotesRenderer/style.css
 @@ -0,0 +1,627 @@
@@ -1894,6 +1892,26 @@ index 0000000..0243c7d
 +p {
 +    margin-bottom: 0;
 +}
++
++/************************
++ *       Equations      *
++ * **********************/
++div.equation {
++    display: flex;
++    margin: 1em 0;
++}
++/* katex-display has a margin of `1em 0`. This messes up the placing of the
++ * equation label. We move this margin to the equation div instead */
++div.equation span.katex-display {
++    margin: 0;
++}
++div.equation span.equation_label {
++    margin-left: 1rem
++}
++div.equation div.equation_content {
++    flex-grow: 1;
++}
++
 +/************************
 + *         Markup       *
 + * **********************/
@@ -2159,26 +2177,6 @@ index 0000000..0243c7d
 +}
 +li.crumb: after {
 +    content: " / "
-+}
-+div.equation {
-+    display: -webkit-box;
-+    display: -ms-flexbox;
-+    display: flex;
-+    margin: 1rem
-+}
-+div.equation span.equation_label {
-+    float: left;
-+    margin-right: 1rem
-+}
-+div.equation span.equation_label: before {
-+    content: "("
-+}
-+div.equation span.equation_label: after {
-+    content: ")"
-+}
-+div.equation div.equation_content {
-+    float: left;
-+    margin-left: 3rem
 +}
 +figure {
 +    display: -webkit-box;
