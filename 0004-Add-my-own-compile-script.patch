@@ -1,0 +1,374 @@
+From 08bface2260b4a6f842a5d0701a52e7069356a8a Mon Sep 17 00:00:00 2001
+From: Dexter Chua <dalcde@yahoo.com.hk>
+Date: Sun, 22 Mar 2020 20:49:35 +0800
+Subject: [PATCH 4/4] Add my own compile script
+
+---
+ .gitignore         |  4 +++
+ README.md          | 90 ++++++++++++++++++++++++----------------------
+ compile_srcf       | 34 ++++++++++++++++++
+ plasTeX/Compile.py | 88 +++++++++++++++++++++++++++++++++++++++++++++
+ plastex.sty        |  7 ++++
+ shortart.cls       | 37 +++++++++++++++++++
+ shortart.py        | 27 ++++++++++++++
+ tex2html           | 11 ++++++
+ 8 files changed, 256 insertions(+), 42 deletions(-)
+ create mode 100755 compile_srcf
+ create mode 100644 plasTeX/Compile.py
+ create mode 100644 plastex.sty
+ create mode 100644 shortart.cls
+ create mode 100644 shortart.py
+ create mode 100755 tex2html
+
+diff --git a/.gitignore b/.gitignore
+index d5f6f35..e065a99 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -72,3 +72,7 @@ Doc/plastex.pdf
+ Doc/plastex.toc
+ Doc/plastex/
+ Doc/plastex6.syn
++
++# Forked build files
++*.bbl
++sources
+diff --git a/README.md b/README.md
+index c1c07f1..35f2385 100644
+--- a/README.md
++++ b/README.md
+@@ -1,44 +1,50 @@
+-# plastex
+-
+-Read more at the github page for the plasTeX project:  http://plastex.github.io/plastex/
+-
+-Installation of this package is done just like any other Python package.
+-See the INSTALL file for details.
+-
+-Once you have plasTeX installed, you can use the command-line utility,
+-called "plastex" just like latex or pdflatex.  For example, if you
+-have a LaTeX file called mybook.tex, simple run:
+-
++# About
++This is a fork of `https://github.com/plastex/plastex` incorporating some
++changes from gerby-project and some of my own. This is intended to be
++continually rebased above `plastex/plastex` `master`, hence will often get
++force-pushed. The changelog for the patches applied can be found at
++[https://github.com/dalcde/plastex-patches](https://github.com/dalcde/plastex-patches).
++
++See [here](http://dec41.user.srcf.net/exp/global_analysis/index.html) for an
++example output. Note that all the math is generated during the compilation
++step, and the resulting html is javascript-free.
++
++To turn a tex file into html, run
++```console
++ $ ./tex2html [source.tex] [target directory]
+ ```
+-plastex mybook.tex
++If `source.pdf` is present, it will be copied to the target directory as well.
++
++The script `./compile_srcf` is a script I use on my webserver to compile
++multiple tex files with some extra configuration. It may serve as a guide for
++customization until I write better documentation.
++
++# Install
++Install the following python(3) dependencies: `PIL` (or `pillow`), `jinja2`,
++`unidecode`, `pyduktape`. Then run the `tex2html` command in this directory.
++
++Please submit a bug report if I am missing any dependencies; it is easy to miss
++ones that are already installed in my system.
++
++# plastex.sty
++Included in this directory is a LaTeX package `plastex.sty`. This package has
++some helper commands and environments:
++
++## The `useimager` environment
++Everything in the `useimager` environment will be compiled with LaTeX and then
++rendered into SVG. This can be used for parts of the document that cannot be
++handled by plastex (yet). The imager is already automatically used for
++`tikzpicture`, hence this doesn't have to be wrapped in `useimager.
++
++## \ifplastex
++The package defines a new variable `\ifplastex`. This can be used as follows:
++```latex
++\ifplastex
++  % commands to be run when processed by plastex
++\else
++  % commands to be run when processed by a usual tex engine
++\fi
+ ```
+-
+-This will convert mybook.tex into XHTML (the default renderer).  Of course,
+-there are many options to control the execution of plastex.  Simply type
+-"plastex" on the command line without options or arguments to see the
+-full list of command-line options.
+-
+-It is also possible to write your own command-line utilities that leverage
+-the power of the plasTeX framework.  In fact, the essence of the "plastex"
+-command can be written in just one line of code (not including the Python
+-import commands):
+-
+-```
+-import sys
+-from plasTeX.TeX import TeX
+-from plasTeX.Renderers.XHTML import Renderer
+-Renderer().render(TeX(file=sys.argv[1]).parse())
+-```
+-
+-plasTeX is really much more than just a LaTeX-to-other-format converter 
+-though.  See the documentation at http://plastex.github.io/plastex/ for a complete
+-view of what it is capable of.
+-
+-## Testing
+-To run the tests locally, run tox.
+-This will run tests locally using python 3.5 to 3.7.
+-
+-## Status
+-[![Build Status](https://travis-ci.org/plastex/plastex.svg?branch=master)](https://travis-ci.org/plastex/plastex)
+-[![Coverage Status](https://coveralls.io/repos/github/plastex/plastex/badge.svg?branch=master)](https://coveralls.io/github/plastex/plastex?branch=master)
+-
++## \tph
++A version of `\texorpdfstring` that now has three arguments, where the third
++argument is what plastex should use.
+diff --git a/compile_srcf b/compile_srcf
+new file mode 100755
+index 0000000..d2a8c30
+--- /dev/null
++++ b/compile_srcf
+@@ -0,0 +1,34 @@
++#!/usr/bin/env python3
++
++import os, sys, shutil
++from plasTeX import Compile
++
++BASE_DIR = "/home/dec41/public_html/exp/"
++
++options = {
++    # Seting css-path prevents Compile.compile from copying style.css to the
++    # output directory and instead uses the css specified at this path.
++    "css-path": "/exp/style.css",
++    # This is where the generated file looks for KaTeX css. By default it gets
++    # it from a CDN.
++    "katex-css-path": "/includes/katex.min.css",
++    # This is a file that loads the Lora and Marcellus SC fonts, generated by https://google-webfonts-helper.herokuapp.com/fonts .
++    # By default it gets it from Google directly.
++    "font-css-path": "/includes/fonts.css",
++}
++
++dirs = os.listdir("sources")
++for filename in dirs:
++    base, ext = os.path.splitext(filename)
++    path = BASE_DIR + "/" + base + "/"
++
++    if ext != ".tex":
++        continue
++
++    if (len(sys.argv) > 1 or
++          not os.path.isdir(path) or
++          not os.path.isfile(path + "index.html") or
++          os.path.getmtime(path + "index.html") < os.path.getmtime("sources/" + filename)):
++        Compile.compile(os.path.join("sources", filename), path, options)
++
++shutil.copy("plasTeX/Renderers/NotesRenderer/style.css", BASE_DIR)
+diff --git a/plasTeX/Compile.py b/plasTeX/Compile.py
+new file mode 100644
+index 0000000..1a20252
+--- /dev/null
++++ b/plasTeX/Compile.py
+@@ -0,0 +1,88 @@
++#!/usr/bin/env python3
++
++import os, shutil
++from distutils.dir_util import copy_tree, mkpath
++import plasTeX
++from plasTeX.TeX import TeX
++from plasTeX.ConfigManager import *
++from plasTeX.Renderers.NotesRenderer import Renderer
++from tempfile import TemporaryDirectory
++
++from plasTeX.Config import config as config_base
++from plasTeX.Renderers.NotesRenderer.Config import config as config_extra
++
++config_global = config_base + config_extra
++
++def rm_tree(d):
++    for f in os.listdir(d):
++        f = os.path.join(d, f)
++        if os.path.isfile(f) or os.path.islink(f):
++            os.unlink(f)
++        else:
++            shutil.rmtree(f)
++
++def compile(filename, target_dir, options={}):
++    source_dir = os.path.dirname(filename)
++    filename = os.path.basename(filename)
++
++    base, ext = os.path.splitext(filename)
++    if ext != ".tex":
++        raise ValueError("{} does not have extension .tex".format(filename))
++
++    print("Compiling " + filename)
++    cwd = os.getcwd()
++
++    os.chdir(source_dir)
++
++    # Re-define source_dir to be the full path
++    source_dir = os.getcwd()
++
++    with TemporaryDirectory() as tmp_dir:
++
++        config = config_global.copy()
++
++        config.set("images", "imager", "gspdfpng")
++        config.set("images", "vector-imager", "dvisvgm")
++        config.set("files", "directory", tmp_dir)
++
++        for key, value in options.items():
++            config.set("notes", key, value)
++
++        # Create document instance that output will be put into
++        document = plasTeX.TeXDocument(config=config)
++        document.userdata['working-dir'] = source_dir
++
++        # Instantiate the TeX processor and parse the document
++        tex = TeX(document, myfile=filename)
++        jobname = document.userdata['jobname'] = tex.jobname
++
++        # Parse the document
++        tex.parse()
++
++        # Set up TEXINPUTS to include the current directory for the renderer
++        os.environ['TEXINPUTS'] = '%s%s%s%s' % (source_dir, os.pathsep,
++                                             os.environ.get('TEXINPUTS',''), os.pathsep)
++
++        # Change to specified directory to output to
++        os.chdir(tmp_dir)
++
++        Renderer().render(document)
++
++        os.chdir(source_dir)
++
++        # Copy files
++        mkpath(target_dir)
++        rm_tree(target_dir)
++        copy_tree(tmp_dir, target_dir)
++        shutil.copy(filename, target_dir)
++        try:
++            shutil.copy(base + ".pdf", target_dir)
++        except OSError:
++            pass
++
++        try:
++            os.remove(base + ".paux")
++        except OSError:
++            pass
++
++    os.chdir(cwd)
+diff --git a/plastex.sty b/plastex.sty
+new file mode 100644
+index 0000000..7fdf492
+--- /dev/null
++++ b/plastex.sty
+@@ -0,0 +1,7 @@
++\ProvidesPackage{plastex}
++
++\newenvironment{useimager}{}{}
++\newif\ifplastex
++\plastexfalse
++
++\DeclareRobustCommand\tph[3]{{\texorpdfstring{#1}{#2}}}
+diff --git a/shortart.cls b/shortart.cls
+new file mode 100644
+index 0000000..97d7ac3
+--- /dev/null
++++ b/shortart.cls
+@@ -0,0 +1,37 @@
++\ProvidesClass{shortart}[2018/01/01 Short Article Class]
++\NeedsTeXFormat{LaTeX2e}
++
++\newif\if@useafourpaper
++\DeclareOption{fullpage}{\@useafourpapertrue}
++
++\ProcessOptions\relax
++
++\if@useafourpaper
++  \LoadClass[a4paper]{article}
++\else
++  \LoadClass[a5paper, 10pt]{article}
++  \RequirePackage[margin=0.4in, includefoot]{geometry}
++\fi
++
++\RequirePackage[hidelinks]{hyperref}
++\RequirePackage[hang, symbol]{footmisc}
++\RequirePackage{microtype}
++\RequirePackage{titlesec}
++
++\titleformat{\section}{\normalfont\Large\sc}{\thesection}{1em}{}
++\titleformat{\subsection}{\normalfont\large\sc}{\thesubsection}{1em}{}
++\renewcommand\tableofcontents{\@starttoc{toc}}
++
++\setcounter{tocdepth}{1}
++\def\footnotemargin{10pt}
++
++\date{}
++
++\let\real@title\title
++\renewcommand\title[1]{\real@title{#1}\hypersetup{pdftitle={#1}}}
++\let\real@author\author
++\renewcommand\author[1]{\real@author{#1}\hypersetup{pdfauthor={#1}}}
++
++\newcommand\qedshift{\vspace{-17pt}}
++\newcommand\fakeqed{\pushQED{\qed}\qedhere}
++\newcommand\separator{\begin{center}\rule{3cm}{0.2pt}\vspace{2pt}\end{center}}
+diff --git a/shortart.py b/shortart.py
+new file mode 100644
+index 0000000..a46fd48
+--- /dev/null
++++ b/shortart.py
+@@ -0,0 +1,27 @@
++
++from plasTeX import Command
++from plasTeX.Packages.report import *
++from plasTeX.Packages.hyperref import *
++
++def ProcessOptions(options, document):
++    from plasTeX.Packages import report
++    report.ProcessOptions(options, document)
++    document.context['thesection'].format = '${section}'
++    document.context['theindex'].counter = 'section'
++    document.context['theindex'].level = Environment.SECTION_LEVEL
++    document.context['printindex'].counter = 'section'
++    document.context['printindex'].level = Command.SECTION_LEVEL
++    document.context['bibliography'].counter = 'section'
++    document.context['bibliography'].level = Command.SECTION_LEVEL
++
++class appendices(Command):
++
++    class thesection(TheCounter):
++        format = '${section.Alph}'
++
++    def invoke(self, tex):
++        self.ownerDocument.context.counters['section'].setcounter(0)
++        self.ownerDocument.context['thesection'] = type(self).thesection
++
++class separator(Command):
++    pass
+diff --git a/tex2html b/tex2html
+new file mode 100755
+index 0000000..fdc0c56
+--- /dev/null
++++ b/tex2html
+@@ -0,0 +1,11 @@
++#!/usr/bin/env python3
++
++import argparse
++from plasTeX import Compile
++
++parser = argparse.ArgumentParser(description="Transform tex files into pdf")
++parser.add_argument("file", type=str, help='tex file to process')
++parser.add_argument("output_dir", type=str, help='output directory')
++
++args = parser.parse_args()
++Compile.compile(args.file, args.output_dir)
+-- 
+2.26.0
+

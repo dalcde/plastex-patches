@@ -1,0 +1,300 @@
+From 738594b5d7d7bffd1664b574bafd994bba52afba Mon Sep 17 00:00:00 2001
+From: Dexter Chua <dalcde@yahoo.com.hk>
+Date: Sun, 22 Mar 2020 16:46:15 +0800
+Subject: [PATCH 1/4] Port changes from gerby-project
+
+The intention is to port as few changes as possible, and eventually
+maybe upstream the rest.
+
+Date: 2020-03-22
+
+Credits: Patrick Massot, Pieter Belmans, Raymond Cheng
+---
+ plasTeX/Base/LaTeX/Accents.py     |  4 ++++
+ plasTeX/Base/LaTeX/Arrays.py      |  2 +-
+ plasTeX/Base/LaTeX/Definitions.py |  5 +++--
+ plasTeX/Base/LaTeX/Index.py       |  3 ++-
+ plasTeX/Base/LaTeX/Math.py        | 13 +++++++++++++
+ plasTeX/Base/LaTeX/Verbatim.py    |  5 +----
+ plasTeX/DOM/__init__.py           |  4 ++++
+ plasTeX/Packages/amsmath.py       |  3 +++
+ plasTeX/Renderers/__init__.py     |  4 +++-
+ plasTeX/Tokenizer.py              |  1 -
+ plasTeX/__init__.py               | 13 +++++++++++--
+ 11 files changed, 45 insertions(+), 12 deletions(-)
+
+diff --git a/plasTeX/Base/LaTeX/Accents.py b/plasTeX/Base/LaTeX/Accents.py
+index d92324f..ab82439 100644
+--- a/plasTeX/Base/LaTeX/Accents.py
++++ b/plasTeX/Base/LaTeX/Accents.py
+@@ -25,6 +25,10 @@ class Accent(Command):
+         return type(self).chars.get(content,
+                 content[0]+self.middle_combining+content[1:]+self.combining)
+ 
++    @property
++    def source(self):
++        return type(self).chars.get(self.textContent.strip(), None)
++
+     @property    
+     def textContent(self):
+         """
+diff --git a/plasTeX/Base/LaTeX/Arrays.py b/plasTeX/Base/LaTeX/Arrays.py
+index caa855c..509dbfa 100644
+--- a/plasTeX/Base/LaTeX/Arrays.py
++++ b/plasTeX/Base/LaTeX/Arrays.py
+@@ -92,7 +92,7 @@ class Array(Environment):
+     class EndRow(Command):
+         """ End of a row """
+         macroName = '\\'
+-        args = '* [ space ]'
++        args = '[ ! space ]'
+ 
+         def invoke(self, tex):
+             # Pop and push a new context for each row, this keeps
+diff --git a/plasTeX/Base/LaTeX/Definitions.py b/plasTeX/Base/LaTeX/Definitions.py
+index ea64af8..1e4d896 100644
+--- a/plasTeX/Base/LaTeX/Definitions.py
++++ b/plasTeX/Base/LaTeX/Definitions.py
+@@ -86,15 +86,16 @@ class newtheorem(Command):
+         if attrs['*modifier*']:
+             newclass = type(str(name), (Environment,),
+                     {'caption': caption, 'nodeName': 'thmenv', 'thmName': name,
+-                        'args': '[title]'})
++                        'args': '[title]', 'forcePars': True})
+         else:
+             newclass = type(str(name), (Environment,),
+                     {'caption': caption, 'nodeName': 'thmenv', 'thmName': name,
+-                        'counter': counter, 'args': '[title]'})
++                        'counter': counter, 'args': '[title]', 'forcePars': True})
+         self.ownerDocument.context.addGlobal(name, newclass)
+ 
+ 
+ class proof(Environment):
++    blockType = True
+     args ='[caption]'
+ 
+     def digest(self, tokens):
+diff --git a/plasTeX/Base/LaTeX/Index.py b/plasTeX/Base/LaTeX/Index.py
+index 320a1bb..8865602 100644
+--- a/plasTeX/Base/LaTeX/Index.py
++++ b/plasTeX/Base/LaTeX/Index.py
+@@ -279,6 +279,7 @@ class index(Command):
+     def textContent(self):
+         return ''
+ 
++"""
+     def invoke(self, tex):
+         result = Command.invoke(self, tex)
+         sortkey, key, format = [], [], []
+@@ -355,7 +356,7 @@ class index(Command):
+         userdata['index'].append(IndexEntry(key, self, sortkey, format, type))
+ 
+         return result
+-
++"""
+ 
+ 
+ class IndexEntry(object):
+diff --git a/plasTeX/Base/LaTeX/Math.py b/plasTeX/Base/LaTeX/Math.py
+index d32c71f..14a018c 100644
+--- a/plasTeX/Base/LaTeX/Math.py
++++ b/plasTeX/Base/LaTeX/Math.py
+@@ -38,6 +38,7 @@ class ThinSpace_(Command):
+ 
+ class MathEnvironment(Environment):
+     mathMode = True
++    doCharSubs = False
+ 
+ class MathEnvironmentPre(MathEnvironment):
+     """
+@@ -111,6 +112,7 @@ class EqnarrayStar(Array):
+     macroName = 'eqnarray*'
+     blockType = True
+     mathMode = True
++    doCharSubs = False
+ 
+     class lefteqn(Command):
+         args = 'self'
+@@ -125,10 +127,14 @@ class EqnarrayStar(Array):
+             return res
+ 
+     class ArrayCell(Array.ArrayCell):
++        doCharSubs = False
+         @property
+         def source(self):
+             return '$\\displaystyle %s $' % sourceChildren(self, par=False)
+ 
++    class ArrayRow(Array.ArrayRow):
++        doCharSubs = False
++
+ class eqnarray(EqnarrayStar):
+     macroName = None
+     counter = 'equation'
+@@ -226,6 +232,7 @@ class ddots(Command):
+ #
+ 
+ class MathSymbol(Command):
++    doCharSubs = False
+     pass
+ 
+ # Lowercase
+@@ -632,6 +639,9 @@ class stackrel(MathAccent):
+ class mathrm(Command):
+     args = 'self'
+ 
++class mathop(Command):
++    args = 'self'
++
+ class mathit(Command):
+     args = 'self'
+ 
+@@ -653,6 +663,9 @@ class boldmath(Command):
+ class unboldmath(Command):
+     pass
+ 
++class text(Command):
++    args = 'self'
++
+ # Math Style
+ 
+ class displaystyle(Command):
+diff --git a/plasTeX/Base/LaTeX/Verbatim.py b/plasTeX/Base/LaTeX/Verbatim.py
+index c1238a6..6d6b189 100644
+--- a/plasTeX/Base/LaTeX/Verbatim.py
++++ b/plasTeX/Base/LaTeX/Verbatim.py
+@@ -13,6 +13,7 @@ from plasTeX.Tokenizer import Other
+ class verbatim(Environment):
+     blockType = True
+     captionable = True
++    doCharSubs = False
+ 
+     def invoke(self, tex):
+         r""" Parse until we reach `\end{verbatim}' or `\endverbatim' """
+@@ -77,10 +78,6 @@ class verbatim(Environment):
+ 
+         return tokens
+ 
+-    def normalize(self, charsubs=None):
+-        """ Normalize, but don't allow character substitutions """
+-        return Environment.normalize(self)
+-
+ class endverbatim(verbatim):
+     def invoke(self, tex):
+         end = self.ownerDocument.createElement(self.nodeName[3:])
+diff --git a/plasTeX/DOM/__init__.py b/plasTeX/DOM/__init__.py
+index afe747d..19dc6b9 100644
+--- a/plasTeX/DOM/__init__.py
++++ b/plasTeX/DOM/__init__.py
+@@ -1070,6 +1070,10 @@ class Node(object):
+ 
+         """
+         charsubs = charsubs or []
++
++        if not getattr(self, "doCharSubs", True) or self.ownerDocument.context.isMathMode:
++            charsubs = []
++
+         if self.hasAttributes():
+             for value in list(self.attributes.values()):
+                 if isinstance(value, Node):
+diff --git a/plasTeX/Packages/amsmath.py b/plasTeX/Packages/amsmath.py
+index 0a9d554..e763ab6 100644
+--- a/plasTeX/Packages/amsmath.py
++++ b/plasTeX/Packages/amsmath.py
+@@ -60,6 +60,9 @@ class EquationStar(_AMSEquationStar):
+ class aligned(_AMSEquation):
+     pass
+ 
++class gathered(MathEnvironmentPre):
++    pass
++
+ class cases(_AMSEquation):
+     pass
+ 
+diff --git a/plasTeX/Renderers/__init__.py b/plasTeX/Renderers/__init__.py
+index 04630f0..823c900 100644
+--- a/plasTeX/Renderers/__init__.py
++++ b/plasTeX/Renderers/__init__.py
+@@ -206,7 +206,9 @@ class Renderable(object):
+ 
+                 status.info(' ] ')
+ 
+-                continue
++                # only continue when it is not supposed to propagate to output higher up
++                if "propagate" not in child.userdata or not child.userdata["propagate"]:
++                    continue
+ 
+             # Append the resultant object to the output
+             s.append(val)
+diff --git a/plasTeX/Tokenizer.py b/plasTeX/Tokenizer.py
+index 2f87362..71f87fc 100644
+--- a/plasTeX/Tokenizer.py
++++ b/plasTeX/Tokenizer.py
+@@ -29,7 +29,6 @@ DEFAULT_CATEGORIES = [
+ VERBATIM_CATEGORIES = [''] * 16
+ VERBATIM_CATEGORIES[11] = encoding.stringletters()
+ 
+-
+ class Token(Text):
+     """ Base class for all TeX tokens """
+ 
+diff --git a/plasTeX/__init__.py b/plasTeX/__init__.py
+index 3c4ff22..e57d761 100644
+--- a/plasTeX/__init__.py
++++ b/plasTeX/__init__.py
+@@ -143,6 +143,9 @@ class Macro(Element):
+     # Force there to be at least on paragraph in the content
+     forcePars = False
+ 
++    # Whether or not to perform character substitutions
++    doCharSubs = True
++
+     def persist(self, attrs=None):
+         """
+         Store attributes needed for cross-document links
+@@ -459,6 +462,7 @@ class Macro(Element):
+             return
+ 
+         self.argSource = ''
++        self.argSources = {}
+         arg = None
+         try:
+             for arg in self.arguments:
+@@ -466,6 +470,7 @@ class Macro(Element):
+                 output, source = tex.readArgumentAndSource(parentNode=self,
+                                                            name=arg.name,
+                                                            **arg.options)
++                self.argSources[arg.name] = source
+                 self.argSource += source
+                 self.attributes[arg.name] = output
+                 self.postArgument(arg, output, tex)
+@@ -608,6 +613,10 @@ class Macro(Element):
+                 macroargs.append(Argument('*modifier*', index, {'spec':item}))
+                 index += 1
+ 
++            # Do not strip leading whitespace
++            elif item in '!':
++                argdict['stripLeadingWhitespace'] = False
++
+             # Optional equals
+             elif item in '=':
+                 argdict.clear()
+@@ -788,7 +797,6 @@ class TeXDocument(Document):
+         ('"`', chr(8222)),
+         ('"\'', chr(8220)),
+         ('`', chr(8216)),
+-        ("'", chr(8217)),
+         ('---', chr(8212)),
+         ('--', chr(8211)),
+ #       ('fj', unichr(58290)),
+@@ -1571,6 +1579,7 @@ class TheCounter(Command):
+         # In this case, whenever a counter value comes out as a zero,
+         # just hank it out.  This is especially useful in document classes
+         # such as book and report which do this in the \thefigure format macro.
+-        t = re.sub(r'\b0[^\dA-Za-z]+', r'', t)
++        # Disabled since this messes things like 4.0.1 up
++        # t = re.sub(r'\b0[^\dA-Za-z]+', r'', t)
+ 
+         return tex.textTokens(t)
+-- 
+2.26.0
+

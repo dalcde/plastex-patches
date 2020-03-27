@@ -1,0 +1,642 @@
+From 244c7e3e41080dc02afd63ca74bcc785e67faca1 Mon Sep 17 00:00:00 2001
+From: Dexter Chua <dec41@srcf.net>
+Date: Sun, 21 Oct 2018 14:49:34 +0100
+Subject: [PATCH 2/4] My own changes. Again these should be upstreamed...
+
+---
+ plasTeX/Base/LaTeX/Math.py     |  14 ++++
+ plasTeX/Base/LaTeX/Verbatim.py |  75 +----------------
+ plasTeX/Context.py             |   3 -
+ plasTeX/Imagers/dvisvgm.py     |   2 +-
+ plasTeX/Packages/amsmath.py    |  59 ++++++++++++--
+ plasTeX/Packages/amsthm.py     |   3 +-
+ plasTeX/Packages/appendix.py   |   0
+ plasTeX/Packages/enumitem.py   |   0
+ plasTeX/Packages/euscript.py   |   0
+ plasTeX/Packages/footmisc.py   |   0
+ plasTeX/Packages/microtype.py  |   0
+ plasTeX/Packages/plastex.py    |   4 +
+ plasTeX/Packages/tikz-cd.py    |  77 +-----------------
+ plasTeX/Packages/tikz.py       | 142 +--------------------------------
+ plasTeX/Packages/titlesec.py   |   0
+ plasTeX/__init__.py            |  73 ++++++++++++++++-
+ 16 files changed, 157 insertions(+), 295 deletions(-)
+ create mode 100644 plasTeX/Packages/appendix.py
+ create mode 100644 plasTeX/Packages/enumitem.py
+ create mode 100644 plasTeX/Packages/euscript.py
+ create mode 100644 plasTeX/Packages/footmisc.py
+ create mode 100644 plasTeX/Packages/microtype.py
+ create mode 100644 plasTeX/Packages/plastex.py
+ create mode 100644 plasTeX/Packages/titlesec.py
+
+diff --git a/plasTeX/Base/LaTeX/Math.py b/plasTeX/Base/LaTeX/Math.py
+index 14a018c..da1bc85 100644
+--- a/plasTeX/Base/LaTeX/Math.py
++++ b/plasTeX/Base/LaTeX/Math.py
+@@ -59,6 +59,13 @@ class math(MathEnvironment):
+             return u'$%s$' % sourceChildren(self)
+         return '$'
+ 
++    @property
++    def rawSource(self):
++        if self.hasChildNodes():
++            return r'%s' % sourceChildren(self)
++        return r''
++
++
+ class displaymath(MathEnvironment):
+     blockType = True
+     @property
+@@ -69,6 +76,13 @@ class displaymath(MathEnvironment):
+             return r'\]'
+         return r'\['
+ 
++    @property
++    def rawSource(self):
++        if self.hasChildNodes():
++            return r'%s' % sourceChildren(self)
++        return r''
++
++
+ class BeginDisplayMath(Command):
+     macroName = '['
+     def invoke(self, tex):
+diff --git a/plasTeX/Base/LaTeX/Verbatim.py b/plasTeX/Base/LaTeX/Verbatim.py
+index 6d6b189..dd75ae9 100644
+--- a/plasTeX/Base/LaTeX/Verbatim.py
++++ b/plasTeX/Base/LaTeX/Verbatim.py
+@@ -4,79 +4,12 @@
+ C.6.4 Verbatim
+ 
+ """
+-
+-from plasTeX import Environment, Command, sourceArguments, sourceChildren
+-from plasTeX.Base.TeX.Text import bgroup
++from plasTeX import VerbatimEnvironment, Command, sourceArguments, sourceChildren
++from plasTeX.Base.TeX.Text import bgroup, egroup
+ from plasTeX.Tokenizer import Other
+ 
+-
+-class verbatim(Environment):
+-    blockType = True
+-    captionable = True
+-    doCharSubs = False
+-
+-    def invoke(self, tex):
+-        r""" Parse until we reach `\end{verbatim}' or `\endverbatim' """
+-        if self.macroMode == Environment.MODE_END:
+-            return
+-
+-        escape = self.ownerDocument.context.categories[0][0]
+-        bgroup = self.ownerDocument.context.categories[1][0]
+-        egroup = self.ownerDocument.context.categories[2][0]
+-        self.ownerDocument.context.push(self)
+-        self.parse(tex)
+-        self.ownerDocument.context.setVerbatimCatcodes()
+-        tokens = [self]
+-
+-        # Should the end environment be expanded?
+-        expand = True
+-
+-        # Get the name of the currently expanding environment
+-        name = self.nodeName
+-        if self.macroMode != Environment.MODE_NONE:
+-            if self.ownerDocument.context.currenvir is not None:
+-                name = self.ownerDocument.context.currenvir
+-
+-        # If we were invoke by a \begin{...} look for an \end{...}
+-        endpattern = list(r'%send%s%s%s' % (escape, bgroup, name, egroup))
+-
+-        # If we were invoked as a command (i.e. \verbatim) look
+-        # for an end without groupings (i.e. \endverbatim)
+-        endpattern2 = list(r'%send%s' % (escape, name))
+-
+-        endlength = len(endpattern)
+-        endlength2 = len(endpattern2)
+-        # Iterate through tokens until the endpattern is found
+-        for tok in tex:
+-            tokens.append(tok)
+-            if len(tokens) >= endlength:
+-                if tokens[-endlength:] == endpattern:
+-                    tokens = tokens[:-endlength]
+-                    self.ownerDocument.context.pop(self)
+-                    # Expand the end of the macro
+-                    end = self.ownerDocument.createElement(name)
+-                    end.parentNode = self.parentNode
+-                    end.macroMode = Environment.MODE_END
+-                    res = end.invoke(tex)
+-                    if res is None:
+-                        res = [end]
+-                    tex.pushTokens(res)
+-                    break
+-            if len(tokens) >= endlength2:
+-                if tokens[-endlength2:] == endpattern2:
+-                    tokens = tokens[:-endlength2]
+-                    self.ownerDocument.context.pop(self)
+-                    # Expand the end of the macro
+-                    end = self.ownerDocument.createElement(name)
+-                    end.parentNode = self.parentNode
+-                    end.macroMode = Environment.MODE_END
+-                    res = end.invoke(tex)
+-                    if res is None:
+-                        res = [end]
+-                    tex.pushTokens(res)
+-                    break
+-
+-        return tokens
++class verbatim(VerbatimEnvironment):
++    pass
+ 
+ class endverbatim(verbatim):
+     def invoke(self, tex):
+diff --git a/plasTeX/Context.py b/plasTeX/Context.py
+index 698112e..6641c6a 100644
+--- a/plasTeX/Context.py
++++ b/plasTeX/Context.py
+@@ -941,9 +941,6 @@ class Context(object):
+         """
+         # Macro already exists
+         if name in list(self.keys()):
+-            if not issubclass(self[name], (plasTeX.NewCommand, plasTeX.Definition)):
+-                if not issubclass(self[name], plasTeX.TheCounter):
+-                    return
+             macrolog.debug('redefining command "%s"', name)
+ 
+         if nargs is None:
+diff --git a/plasTeX/Imagers/dvisvgm.py b/plasTeX/Imagers/dvisvgm.py
+index b46ddc2..39ee47c 100644
+--- a/plasTeX/Imagers/dvisvgm.py
++++ b/plasTeX/Imagers/dvisvgm.py
+@@ -15,7 +15,7 @@ class DVISVGM(_Imager):
+         page = 1
+         while 1:
+             filename = 'img%d.svg' % page
+-            rc = os.system('dvisvgm --exact --scale=1.6 --no-fonts --output=%s --page=%d images.dvi' % (filename, page))
++            rc = os.system('dvisvgm --exact --scale=1.4 --no-fonts --output=%s --page=%d images.dvi' % (filename, page))
+             if rc:
+                 break
+ 
+diff --git a/plasTeX/Packages/amsmath.py b/plasTeX/Packages/amsmath.py
+index e763ab6..948c379 100644
+--- a/plasTeX/Packages/amsmath.py
++++ b/plasTeX/Packages/amsmath.py
+@@ -1,10 +1,10 @@
+ #!/usr/bin/env python
+ 
+-from plasTeX import Command
++from plasTeX import Command, Environment
+ from plasTeX.Base.LaTeX.Arrays import Array
+ from plasTeX.Base.LaTeX.Math import EqnarrayStar, eqnarray
+ #### Imports Added by Tim ####
+-from plasTeX.Base.LaTeX.Math import math, MathEnvironmentPre
++from plasTeX.Base.LaTeX.Math import math, MathEnvironmentPre, MathEnvironment
+ 
+ from plasTeX import Tokenizer
+ from plasTeX.Logging import getLogger
+@@ -23,15 +23,61 @@ class _AMSEquationStar(EqnarrayStar):
+ class align(_AMSEquation):
+     pass
+ 
+-class AlignStar(_AMSEquationStar):
++class AlignStar(MathEnvironment):
+     macroName = 'align*'
+ 
++    def invoke(self, tex):
++        if self.macroMode == Command.MODE_BEGIN:
++            o = self.ownerDocument.createElement('displaymath')
++            o.macroMode = Command.MODE_BEGIN
++            self.ownerDocument.context.push(o)
++
++            p = self.ownerDocument.createElement('aligned')
++            p.macroMode = Command.MODE_BEGIN
++            self.ownerDocument.context.push(p)
++
++            return [o, p]
++
++        elif self.macroMode == Command.MODE_END:
++            p = self.ownerDocument.createElement('aligned')
++            p.macroMode = Command.MODE_END
++            self.ownerDocument.context.push(p)
++
++            o = self.ownerDocument.createElement('displaymath')
++            o.macroMode = Command.MODE_END
++            self.ownerDocument.context.push(o)
++
++            return [p, o]
++
+ class gather(_AMSEquation):
+     pass
+ 
+-class GatherStar(_AMSEquationStar):
++class GatherStar(MathEnvironment):
+     macroName = 'gather*'
+ 
++    def invoke(self, tex):
++        if self.macroMode == Command.MODE_BEGIN:
++            o = self.ownerDocument.createElement('displaymath')
++            o.macroMode = Command.MODE_BEGIN
++            self.ownerDocument.context.push(o)
++
++            p = self.ownerDocument.createElement('gathered')
++            p.macroMode = Command.MODE_BEGIN
++            self.ownerDocument.context.push(p)
++
++            return [o, p]
++
++        elif self.macroMode == Command.MODE_END:
++            p = self.ownerDocument.createElement('gathered')
++            p.macroMode = Command.MODE_END
++            self.ownerDocument.context.push(p)
++
++            o = self.ownerDocument.createElement('displaymath')
++            o.macroMode = Command.MODE_END
++            self.ownerDocument.context.push(o)
++
++            return [p, o]
++
+ class falign(_AMSEquation):
+     pass
+ 
+@@ -57,7 +103,10 @@ class split(_AMSEquation):
+ class EquationStar(_AMSEquationStar):
+     macroName = 'equation*'
+ 
+-class aligned(_AMSEquation):
++class aligned(Environment):
++    pass
++
++class gathered(Environment):
+     pass
+ 
+ class gathered(MathEnvironmentPre):
+diff --git a/plasTeX/Packages/amsthm.py b/plasTeX/Packages/amsthm.py
+index 981550a..b549a3d 100755
+--- a/plasTeX/Packages/amsthm.py
++++ b/plasTeX/Packages/amsthm.py
+@@ -121,6 +121,7 @@ Example document:
+ 
+ """
+ 
++"""
+ import plasTeX
+ 
+ 
+@@ -281,4 +282,4 @@ class theoremCommand(plasTeX.Environment):
+         elif self.macroMode == self.MODE_END:
+             self.ownerDocument.context.pop(self)
+             return
+-
++"""
+diff --git a/plasTeX/Packages/appendix.py b/plasTeX/Packages/appendix.py
+new file mode 100644
+index 0000000..e69de29
+diff --git a/plasTeX/Packages/enumitem.py b/plasTeX/Packages/enumitem.py
+new file mode 100644
+index 0000000..e69de29
+diff --git a/plasTeX/Packages/euscript.py b/plasTeX/Packages/euscript.py
+new file mode 100644
+index 0000000..e69de29
+diff --git a/plasTeX/Packages/footmisc.py b/plasTeX/Packages/footmisc.py
+new file mode 100644
+index 0000000..e69de29
+diff --git a/plasTeX/Packages/microtype.py b/plasTeX/Packages/microtype.py
+new file mode 100644
+index 0000000..e69de29
+diff --git a/plasTeX/Packages/plastex.py b/plasTeX/Packages/plastex.py
+new file mode 100644
+index 0000000..2f4d122
+--- /dev/null
++++ b/plasTeX/Packages/plastex.py
+@@ -0,0 +1,4 @@
++from plasTeX import VerbatimEnvironment
++
++class useimager(VerbatimEnvironment):
++    pass
+diff --git a/plasTeX/Packages/tikz-cd.py b/plasTeX/Packages/tikz-cd.py
+index 797672b..70fd6fb 100644
+--- a/plasTeX/Packages/tikz-cd.py
++++ b/plasTeX/Packages/tikz-cd.py
+@@ -1,75 +1,4 @@
+-import os
+-import tempfile
+-from jinja2 import Template
+-from bs4 import BeautifulSoup
++from plasTeX import VerbatimEnvironment
+ 
+-from plasTeX import NoCharSubEnvironment, Command
+-from plasTeX.PackageResource import PackageResource
+-from plasTeX.Packages import tikz
+-
+-from plasTeX.Logging import getLogger
+-log = getLogger()
+-
+-class tikzcd(NoCharSubEnvironment):
+-    """
+-    A tikz-cd diagram whose content will be converted in the processFileContent callback.
+-    """
+-
+-
+-    class ar(Command):
+-        pass
+-
+-    class rar(Command):
+-        pass
+-
+-    class lar(Command):
+-        pass
+-
+-    class uar(Command):
+-        pass
+-
+-    class drar(Command):
+-        pass
+-
+-    class dar(Command):
+-        pass
+-
+-    class dlar(Command):
+-        pass
+-
+-    class ular(Command):
+-        pass
+-
+-    class urar(Command):
+-        pass
+-
+-
+-def ProcessOptions(options, document):
+-    """This is called when the package is loaded."""
+-    
+-    try:
+-        with open(document.config['html5']['tikz-cd-template'], "r") as file:
+-            template = file.read()
+-    except IOError:
+-        log.info('Using default TikZ template.')
+-        template = u"\\documentclass{standalone}\n\\usepackage{tikz-cd}" + \
+-                   u"\\begin{document}{{ tikzpicture }}\\end{document}"
+-    document.userdata['tikzcd'] = {
+-            'template': Template(template),
+-            'tmp_dir': tempfile.mkdtemp(),
+-            'compiler': document.config['html5']['tikz-compiler'],
+-            'pdf2svg': document.config['html5']['tikz-converter'],
+-            }
+-
+-    def convert(document, content):
+-        return tikz.tikzConvert(
+-                document, 
+-                content, 
+-                'tikzcd', 
+-                'Commutative diagram')
+-
+-    cb = PackageResource(
+-            renderers='html5',
+-            key='processFileContents',
+-            data=convert) 
+-    document.addPackageResource(cb)
++class tikzcd(VerbatimEnvironment):
++    pass
+diff --git a/plasTeX/Packages/tikz.py b/plasTeX/Packages/tikz.py
+index 98b5402..df8c96d 100644
+--- a/plasTeX/Packages/tikz.py
++++ b/plasTeX/Packages/tikz.py
+@@ -1,140 +1,4 @@
+-"""
+-Implement the tikz package for html output.
+-The original tikz and latex do most of the work and then pdf2svg (or similar
+-software) turns it into a svg image.
+-Needs Beautiful Soup, Jinja2, and pdf2svg or similar
+-"""
++from plasTeX import VerbatimEnvironment
+ 
+-import os
+-import string
+-import subprocess
+-import shutil
+-import tempfile
+-from plasTeX import Environment, NoCharSubEnvironment, Macro
+-from plasTeX.PackageResource import PackageResource
+-
+-from plasTeX.Logging import getLogger
+-log = getLogger()
+-
+-try:
+-    from jinja2 import Template
+-except ImportError:
+-    log.warning('Cannot find jinja2 lib. Cannot use tikz.')
+-
+-try:
+-    from bs4 import BeautifulSoup
+-except ImportError:
+-    log.warning('Cannot find BeautifulSoup lib. Cannot use tikz.')
+-
+-
+-class tikzpicture(NoCharSubEnvironment):
+-    """
+-    A tikz picture whose content will be converted in the processFileContent callback.
+-    """
+-    class matrix(Environment):
+-        """
+-        Avoids conflict with amsmath matrix thanks to the context stack
+-        mechanism.
+-        """
+-
+-    class draw(Macro):
+-        """ Only avoids unrecognized command warning. """
+-    
+-    class fill(Macro):
+-        """ Only avoids unrecognized command warning. """
+-
+-    class filldraw(Macro):
+-        """ Only avoids unrecognized command warning. """
+-
+-    class node(Macro):
+-        """ Only avoids unrecognized command warning. """
+-
+-    class path(Macro):
+-        """ Only avoids unrecognized command warning. """
+-
+-    class clip(Macro):
+-        """ Only avoids unrecognized command warning. """
+-
+-def tikzConvert(document, content, envname, placeholder):
+-    tmp_dir = document.userdata[envname]['tmp_dir']
+-    working_dir = document.userdata['working-dir']
+-    outdir = document.config['files']['directory']
+-    outdir = string.Template(outdir).substitute(
+-            {'jobname': document.userdata.get('jobname', '')})
+-    target_dir = os.path.join(working_dir, outdir, 'images')
+-    if not os.path.isdir(target_dir):
+-        os.makedirs(target_dir)
+-    template = document.userdata[envname]['template']
+-    compiler = document.userdata[envname]['compiler']
+-    pdf2svg = document.userdata[envname]['pdf2svg']
+-
+-    cwd = os.getcwd()
+-    os.chdir(tmp_dir)
+-    soup = BeautifulSoup(content, "html.parser")
+-    encoding = soup.original_encoding
+-
+-    envs = soup.findAll(envname)
+-    for env in envs:
+-        object_id = env.attrs['id']
+-        basepath = os.path.join(tmp_dir, object_id)
+-        texpath = basepath + '.tex'
+-        pdfpath = basepath + '.pdf'
+-        svgpath =  basepath + '.svg'
+-
+-        context = { 'tikzpicture': env.text.strip() }
+-        template.stream(**context).dump(texpath, encoding)
+-
+-        subprocess.call([compiler, texpath])
+-        subprocess.call([pdf2svg, pdfpath, svgpath])
+-        destination = os.path.join(target_dir, object_id+'.svg')
+-        if os.path.isfile(destination):
+-            os.remove(destination)
+-        shutil.move(svgpath, target_dir)
+-
+-        obj = soup.new_tag(
+-                'object', 
+-                type='image/svg+xml',
+-                data='images/' + object_id + '.svg')
+-        obj.string = document.context.terms.get(
+-                placeholder,
+-                placeholder) + '\n' + env.text.strip()
+-        obj.attrs['class'] = envname
+-        div = soup.new_tag('div')
+-        div.attrs['class'] = envname
+-        div.insert(1, obj)
+-
+-        env.replace_with(div)
+-    os.chdir(cwd)
+-    try:
+-        # python2
+-        result = unicode(soup)
+-    except NameError:
+-        # python3
+-        result = str(soup)
+-    return result
+-
+-def ProcessOptions(options, document):
+-    """This is called when the package is loaded."""
+-    
+-    try:
+-        with open(document.config['html5']['tikz-template'], "r") as file:
+-            template = file.read()
+-    except IOError:
+-        log.info('Using default TikZ template.')
+-        template = u"\\documentclass{standalone}\n\\usepackage{tikz}" + \
+-                   u"\\begin{document}{{ tikzpicture }}\\end{document}"
+-    document.userdata['tikzpicture'] = {
+-            'template': Template(template),
+-            'tmp_dir': tempfile.mkdtemp(),
+-            'compiler': document.config['html5']['tikz-compiler'],
+-            'pdf2svg': document.config['html5']['tikz-converter'],
+-            }
+-
+-    def convert(document, content):
+-        return tikzConvert(document, content, 'tikzpicture', 'TikZ picture')
+-
+-    cb = PackageResource(
+-            renderers='html5',
+-            key='processFileContents',
+-            data=convert) 
+-    document.addPackageResource(cb)
++class tikzpicture(VerbatimEnvironment):
++    pass
+diff --git a/plasTeX/Packages/titlesec.py b/plasTeX/Packages/titlesec.py
+new file mode 100644
+index 0000000..e69de29
+diff --git a/plasTeX/__init__.py b/plasTeX/__init__.py
+index e57d761..1b055a0 100644
+--- a/plasTeX/__init__.py
++++ b/plasTeX/__init__.py
+@@ -922,7 +922,6 @@ class Environment(Macro):
+         if dopars:
+             self.paragraphs()
+ 
+-
+ class NoCharSubEnvironment(Environment):
+     """
+     A subclass of Environment which prevents character substitution inside
+@@ -944,6 +943,78 @@ class NoCharSubEnvironment(Environment):
+             doc.charsubs = self.charsubs
+         super(NoCharSubEnvironment, self).invoke(tex)
+ 
++class VerbatimEnvironment(Environment):
++    """
++    A subclass of Environment that prevents processing of the contents. Useful for the verbatim environment and content that is intended to be parsed by imager.
++    """
++
++    blockType = True
++    captionable = True
++    doCharSubs = False
++
++    def invoke(self, tex):
++        r""" Parse until we reach `\end{verbatim}' or `\endverbatim' """
++        if self.macroMode == Environment.MODE_END:
++            return
++
++        escape = self.ownerDocument.context.categories[0][0]
++        bgroup = self.ownerDocument.context.categories[1][0]
++        egroup = self.ownerDocument.context.categories[2][0]
++        self.ownerDocument.context.push(self)
++        self.parse(tex)
++        self.ownerDocument.context.setVerbatimCatcodes()
++        tokens = [self]
++
++        # Should the end environment be expanded?
++        expand = True
++
++        # Get the name of the currently expanding environment
++        name = self.nodeName
++        if self.macroMode != Environment.MODE_NONE:
++            if self.ownerDocument.context.currenvir is not None:
++                name = self.ownerDocument.context.currenvir
++
++        # If we were invoke by a \begin{...} look for an \end{...}
++        endpattern = list(r'%send%s%s%s' % (escape, bgroup, name, egroup))
++
++        # If we were invoked as a command (i.e. \verbatim) look
++        # for an end without groupings (i.e. \endverbatim)
++        endpattern2 = list(r'%send%s' % (escape, name))
++
++        endlength = len(endpattern)
++        endlength2 = len(endpattern2)
++        # Iterate through tokens until the endpattern is found
++        for tok in tex:
++            tokens.append(tok)
++            if len(tokens) >= endlength:
++                if tokens[-endlength:] == endpattern:
++                    tokens = tokens[:-endlength]
++                    self.ownerDocument.context.pop(self)
++                    # Expand the end of the macro
++                    end = self.ownerDocument.createElement(name)
++                    end.parentNode = self.parentNode
++                    end.macroMode = Environment.MODE_END
++                    res = end.invoke(tex)
++                    if res is None:
++                        res = [end]
++                    tex.pushTokens(res)
++                    break
++            if len(tokens) >= endlength2:
++                if tokens[-endlength2:] == endpattern2:
++                    tokens = tokens[:-endlength2]
++                    self.ownerDocument.context.pop(self)
++                    # Expand the end of the macro
++                    end = self.ownerDocument.createElement(name)
++                    end.parentNode = self.parentNode
++                    end.macroMode = Environment.MODE_END
++                    res = end.invoke(tex)
++                    if res is None:
++                        res = [end]
++                    tex.pushTokens(res)
++                    break
++
++        return tokens
++
+ class IgnoreCommand(Command):
+     """
+     This command will be parsed, but will not go to the output stream
+-- 
+2.26.0
+
