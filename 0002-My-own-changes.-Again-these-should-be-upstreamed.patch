@@ -1,10 +1,10 @@
-From 5686251fd237f6d3fc09bc631576372e36e66048 Mon Sep 17 00:00:00 2001
+From fa5284a5b191ad3c626301037ce73c43c33d4365 Mon Sep 17 00:00:00 2001
 From: Dexter Chua <dec41@srcf.net>
 Date: Sun, 21 Oct 2018 14:49:34 +0100
 Subject: [PATCH 2/4] My own changes. Again these should be upstreamed...
 
 ---
- plasTeX/Base/LaTeX/Verbatim.py |  75 +----------------
+ plasTeX/Base/LaTeX/Verbatim.py |  73 +----------------
  plasTeX/Context.py             |   3 -
  plasTeX/Imagers/dvisvgm.py     |   2 +-
  plasTeX/Packages/amsmath.py    |  59 ++++++++++++--
@@ -19,7 +19,7 @@ Subject: [PATCH 2/4] My own changes. Again these should be upstreamed...
  plasTeX/Packages/tikz.py       | 142 +--------------------------------
  plasTeX/Packages/titlesec.py   |   0
  plasTeX/__init__.py            |  73 ++++++++++++++++-
- 15 files changed, 143 insertions(+), 295 deletions(-)
+ 15 files changed, 142 insertions(+), 294 deletions(-)
  create mode 100644 plasTeX/Packages/appendix.py
  create mode 100644 plasTeX/Packages/enumitem.py
  create mode 100644 plasTeX/Packages/euscript.py
@@ -29,7 +29,7 @@ Subject: [PATCH 2/4] My own changes. Again these should be upstreamed...
  create mode 100644 plasTeX/Packages/titlesec.py
 
 diff --git a/plasTeX/Base/LaTeX/Verbatim.py b/plasTeX/Base/LaTeX/Verbatim.py
-index 6d6b189..dd75ae9 100644
+index 6d6b189..ea20f5a 100644
 --- a/plasTeX/Base/LaTeX/Verbatim.py
 +++ b/plasTeX/Base/LaTeX/Verbatim.py
 @@ -4,79 +4,12 @@
@@ -38,9 +38,8 @@ index 6d6b189..dd75ae9 100644
  """
 -
 -from plasTeX import Environment, Command, sourceArguments, sourceChildren
--from plasTeX.Base.TeX.Text import bgroup
 +from plasTeX import VerbatimEnvironment, Command, sourceArguments, sourceChildren
-+from plasTeX.Base.TeX.Text import bgroup, egroup
+ from plasTeX.Base.TeX.Text import bgroup
  from plasTeX.Tokenizer import Other
  
 -
