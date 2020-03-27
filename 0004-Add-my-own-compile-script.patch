@@ -1,18 +1,18 @@
-From 84e1839381ab0a586f4ea2dfdcb09e3d0bda9c6c Mon Sep 17 00:00:00 2001
+From 231a860562546e5e9d62c298d4e6595d16d9c989 Mon Sep 17 00:00:00 2001
 From: Dexter Chua <dalcde@yahoo.com.hk>
 Date: Sun, 22 Mar 2020 20:49:35 +0800
 Subject: [PATCH 4/4] Add my own compile script
 
 ---
- .gitignore         |  4 +++
- README.md          | 90 ++++++++++++++++++++++++----------------------
- compile_srcf       | 34 ++++++++++++++++++
+ .gitignore         |  4 ++
+ README.md          | 91 +++++++++++++++++++++++++---------------------
+ compile_srcf       | 34 +++++++++++++++++
  plasTeX/Compile.py | 89 +++++++++++++++++++++++++++++++++++++++++++++
  plastex.sty        |  7 ++++
  shortart.cls       | 37 +++++++++++++++++++
  shortart.py        | 27 ++++++++++++++
  tex2html           | 11 ++++++
- 8 files changed, 257 insertions(+), 42 deletions(-)
+ 8 files changed, 258 insertions(+), 42 deletions(-)
  create mode 100755 compile_srcf
  create mode 100644 plasTeX/Compile.py
  create mode 100644 plastex.sty
@@ -33,10 +33,10 @@ index d5f6f35..e065a99 100644
 +*.bbl
 +sources
 diff --git a/README.md b/README.md
-index c1c07f1..35f2385 100644
+index c1c07f1..68bc39f 100644
 --- a/README.md
 +++ b/README.md
-@@ -1,44 +1,50 @@
+@@ -1,44 +1,51 @@
 -# plastex
 -
 -Read more at the github page for the plasTeX project:  http://plastex.github.io/plastex/
@@ -54,6 +54,7 @@ index c1c07f1..35f2385 100644
 +continually rebased above `plastex/plastex` `master`, hence will often get
 +force-pushed. The changelog for the patches applied can be found at
 +[https://github.com/dalcde/plastex-patches](https://github.com/dalcde/plastex-patches).
++Please send all issues and pull requests there.
 +
 +See [here](http://dec41.user.srcf.net/exp/global_analysis/index.html) for an
 +example output. Note that all the math is generated during the compilation
