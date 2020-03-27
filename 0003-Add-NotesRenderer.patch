@@ -1,4 +1,4 @@
-From 50e50add6c75da195a9bc0cb4060f5e80a23de74 Mon Sep 17 00:00:00 2001
+From 1834dee737e55bfcd6a937dc73464b74404a5cd6 Mon Sep 17 00:00:00 2001
 From: Dexter Chua <dalcde@yahoo.com.hk>
 Date: Sun, 22 Mar 2020 17:20:00 +0800
 Subject: [PATCH 3/4] Add NotesRenderer
@@ -22,7 +22,7 @@ The katex version is 0.11.1
  .../NotesRenderer/Templates/Footnotes.jinja2s |  11 +
  .../NotesRenderer/Templates/Index.jinja2s     |  41 ++
  .../NotesRenderer/Templates/Lists.jinja2s     |  21 +
- .../NotesRenderer/Templates/Math.jinja2s      |  15 +
+ .../NotesRenderer/Templates/Math.jinja2s      |  16 +
  .../NotesRenderer/Templates/Misc.jinja2s      |  20 +
  .../NotesRenderer/Templates/Pictures.jinja2s  |  10 +
  .../Templates/Primitives.jinja2s              |  12 +
@@ -59,8 +59,8 @@ The katex version is 0.11.1
  plasTeX/Renderers/NotesRenderer/__init__.py   | 305 +++++++++
  plasTeX/Renderers/NotesRenderer/katex.min.js  |   1 +
  plasTeX/Renderers/NotesRenderer/layout.jinja2 | 103 +++
- plasTeX/Renderers/NotesRenderer/style.css     | 627 ++++++++++++++++++
- 53 files changed, 1873 insertions(+)
+ plasTeX/Renderers/NotesRenderer/style.css     | 631 ++++++++++++++++++
+ 53 files changed, 1878 insertions(+)
  create mode 100644 plasTeX/Renderers/NotesRenderer/Config.py
  create mode 100644 plasTeX/Renderers/NotesRenderer/README.md
  create mode 100644 plasTeX/Renderers/NotesRenderer/TODO
@@ -546,10 +546,10 @@ index 0000000..6f387ee
 +</dl>
 diff --git a/plasTeX/Renderers/NotesRenderer/Templates/Math.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/Math.jinja2s
 new file mode 100644
-index 0000000..8afcf4e
+index 0000000..dfdba50
 --- /dev/null
 +++ b/plasTeX/Renderers/NotesRenderer/Templates/Math.jinja2s
-@@ -0,0 +1,15 @@
+@@ -0,0 +1,16 @@
 +name: math
 +{{ obj.inlineMath }}
 +
@@ -562,6 +562,7 @@ index 0000000..8afcf4e
 +
 +name: equation
 +<div class="equation" id="{{ obj.id }}">
++  <span class="equation_label_spacer">( {{ obj.ref }} )</span>
 +  <div class="equation_content">{{ obj.displayMath }}</div>
 +  <span class="equation_label">( {{ obj.ref }} )</span>
 +</div>
@@ -1676,10 +1677,10 @@ index 0000000..d36d316
 +</html>
 diff --git a/plasTeX/Renderers/NotesRenderer/style.css b/plasTeX/Renderers/NotesRenderer/style.css
 new file mode 100644
-index 0000000..794ec04
+index 0000000..0477015
 --- /dev/null
 +++ b/plasTeX/Renderers/NotesRenderer/style.css
-@@ -0,0 +1,627 @@
+@@ -0,0 +1,631 @@
 +/************************
 + *         Header       *
 + * **********************/
@@ -1905,8 +1906,12 @@ index 0000000..794ec04
 +div.equation span.katex-display {
 +    margin: 0;
 +}
++div.equation span.equation_label_spacer {
++    margin-right: 1rem;
++    visibility: hidden;
++}
 +div.equation span.equation_label {
-+    margin-left: 1rem
++    margin-left: 1rem;
 +}
 +div.equation div.equation_content {
 +    flex-grow: 1;
