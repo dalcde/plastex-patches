@@ -1,4 +1,4 @@
-From c147ddb43a51e420331e24bdae9438eb5e377631 Mon Sep 17 00:00:00 2001
+From b42479d2026ee54c40cffe4c95b45246b98f855b Mon Sep 17 00:00:00 2001
 From: Dexter Chua <dalcde@yahoo.com.hk>
 Date: Sun, 22 Mar 2020 17:20:00 +0800
 Subject: [PATCH 3/4] Add NotesRenderer
@@ -22,7 +22,7 @@ The katex version is 0.11.1
  .../NotesRenderer/Templates/Footnotes.jinja2s |  11 +
  .../NotesRenderer/Templates/Index.jinja2s     |  41 ++
  .../NotesRenderer/Templates/Lists.jinja2s     |  21 +
- .../NotesRenderer/Templates/Math.jinja2s      |  21 +
+ .../NotesRenderer/Templates/Math.jinja2s      |  17 +
  .../NotesRenderer/Templates/Misc.jinja2s      |  20 +
  .../NotesRenderer/Templates/Pictures.jinja2s  |  10 +
  .../Templates/Primitives.jinja2s              |  12 +
@@ -56,11 +56,11 @@ The katex version is 0.11.1
  .../NotesRenderer/Templates/textcomp.jinja2s  |   3 +
  .../NotesRenderer/Templates/url.jinja2s       |   4 +
  .../NotesRenderer/Templates/wrapfig.jinja2s   |   2 +
- plasTeX/Renderers/NotesRenderer/__init__.py   | 319 +++++++++
+ plasTeX/Renderers/NotesRenderer/__init__.py   | 305 +++++++++
  plasTeX/Renderers/NotesRenderer/katex.min.js  |   1 +
  plasTeX/Renderers/NotesRenderer/layout.jinja2 | 103 +++
  plasTeX/Renderers/NotesRenderer/style.css     | 627 ++++++++++++++++++
- 53 files changed, 1893 insertions(+)
+ 53 files changed, 1875 insertions(+)
  create mode 100644 plasTeX/Renderers/NotesRenderer/Config.py
  create mode 100644 plasTeX/Renderers/NotesRenderer/README.md
  create mode 100644 plasTeX/Renderers/NotesRenderer/TODO
@@ -546,29 +546,25 @@ index 0000000..6f387ee
 +</dl>
 diff --git a/plasTeX/Renderers/NotesRenderer/Templates/Math.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/Math.jinja2s
 new file mode 100644
-index 0000000..47735fd
+index 0000000..c2b1d4b
 --- /dev/null
 +++ b/plasTeX/Renderers/NotesRenderer/Templates/Math.jinja2s
-@@ -0,0 +1,21 @@
+@@ -0,0 +1,17 @@
 +name: math
-+{{ obj.source }}
++{{ obj.inlineMath }}
 +
 +name: ensuremath eqnarray eqnarray* align align* gather gather* flalign flalign* \
 +      multline multline* alignat alignat* split DeclareMathOperator
-+<span>{{ obj.source }}</span>
++<span>{{ obj.displayMath }}</span>
 +
 +name: displaymath equation*
-+<div class="displaymath" id="{{ obj.id }}">
-+  {{ obj.source }}
-+</div>
++{{ obj.displayMath }}
 +
 +name: equation
 +<div class="equation" id="{{ obj.id }}">
 +<p>
 +  <span class="equation_label">{{ obj.ref }}</span>
-+  <div class="equation_content">
-+    {{ obj.source }}
-+  </div>
++  {{ obj.displayMath }}
 +</p>
 +</div>
 diff --git a/plasTeX/Renderers/NotesRenderer/Templates/Misc.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/Misc.jinja2s
@@ -1254,10 +1250,10 @@ index 0000000..fbdaf85
 +<div style="float: {{ obj.float }}">>{{ obj }}</div>
 diff --git a/plasTeX/Renderers/NotesRenderer/__init__.py b/plasTeX/Renderers/NotesRenderer/__init__.py
 new file mode 100644
-index 0000000..b909763
+index 0000000..50e6049
 --- /dev/null
 +++ b/plasTeX/Renderers/NotesRenderer/__init__.py
-@@ -0,0 +1,319 @@
+@@ -0,0 +1,305 @@
 +#!/usr/bin/env python
 +
 +import sys, os, re, shutil
@@ -1288,15 +1284,11 @@ index 0000000..b909763
 +        res[i] = _katex(res[i], False)
 +    return " ".join(res)
 +
-+def getTrueTitle(x):
-+    return processMath(x.title)
-+
-+def getFullTrueTitle(x):
-+    return processMath(x.fullTitle)
-+
 +# Monkey patch to use our mathEngine
-+_Renderable.trueTitle = property(getTrueTitle, None)
-+_Renderable.fullTrueTitle = property(getFullTrueTitle, None)
++_Renderable.trueTitle = property(lambda obj: processMath(obj.title), None)
++_Renderable.fullTrueTitle = property(lambda obj: processMath(obj.fullTitle), None)
++_Renderable.displayMath = property(lambda obj: _katex(obj.childrenSource, True), None)
++_Renderable.inlineMath = property(lambda obj: _katex(obj.childrenSource, False), None)
 +
 +# Support for Jinja2 templates
 +from jinja2 import Environment
@@ -1367,16 +1359,6 @@ index 0000000..b909763
 +
 +        # Load main template
 +        self.parseTemplate(os.path.join(cwd, "layout.jinja2"), "default-layout")
-+
-+        # Now define the math renderers by hand
-+        def _displaymath(node):
-+            return _katex(node.rawSource, True)
-+
-+        def _math(node):
-+            return _katex(node.rawSource, False)
-+
-+        self['displaymath'] = _displaymath
-+        self['math'] = _math
 +
 +        # Copy style.css if config["notes"]["css-path"] is "style.css". Otherwise,
 +        # it is some custom location specified by the user, and the user is
