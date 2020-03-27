@@ -1,4 +1,4 @@
-From 0008135d2daffd6fcda7826790336d5409fedd26 Mon Sep 17 00:00:00 2001
+From c147ddb43a51e420331e24bdae9438eb5e377631 Mon Sep 17 00:00:00 2001
 From: Dexter Chua <dalcde@yahoo.com.hk>
 Date: Sun, 22 Mar 2020 17:20:00 +0800
 Subject: [PATCH 3/4] Add NotesRenderer
@@ -29,7 +29,7 @@ The katex version is 0.11.1
  .../Templates/Quotations.jinja2s              |   8 +
  .../Templates/Sectioning.jinja2s              |  56 ++
  .../NotesRenderer/Templates/Sentences.jinja2s |  50 ++
- .../NotesRenderer/Templates/Space.jinja2s     |  17 +
+ .../NotesRenderer/Templates/Space.jinja2s     |  16 +
  .../NotesRenderer/Templates/Tabbing.jinja2s   |  10 +
  .../NotesRenderer/Templates/Thms.jinja2s      |  29 +
  .../NotesRenderer/Templates/Tikz.jinja2s      |   8 +
@@ -40,7 +40,7 @@ The katex version is 0.11.1
  .../NotesRenderer/Templates/color.jinja2s     |   4 +
  .../NotesRenderer/Templates/embed.jinja2s     |   2 +
  .../NotesRenderer/Templates/fancybox.jinja2s  |   8 +
- .../NotesRenderer/Templates/float.jinja2s     |   2 +
+ .../NotesRenderer/Templates/float.jinja2s     |   1 +
  .../NotesRenderer/Templates/graphicx.jinja2s  |   8 +
  .../NotesRenderer/Templates/html.jinja2s      |  14 +
  .../NotesRenderer/Templates/hyperref.jinja2s  |  71 ++
@@ -60,7 +60,7 @@ The katex version is 0.11.1
  plasTeX/Renderers/NotesRenderer/katex.min.js  |   1 +
  plasTeX/Renderers/NotesRenderer/layout.jinja2 | 103 +++
  plasTeX/Renderers/NotesRenderer/style.css     | 627 ++++++++++++++++++
- 53 files changed, 1895 insertions(+)
+ 53 files changed, 1893 insertions(+)
  create mode 100644 plasTeX/Renderers/NotesRenderer/Config.py
  create mode 100644 plasTeX/Renderers/NotesRenderer/README.md
  create mode 100644 plasTeX/Renderers/NotesRenderer/TODO
@@ -765,7 +765,7 @@ index 0000000..d3addae
 +<span class="underbar">{{ obj }}</span>
 diff --git a/plasTeX/Renderers/NotesRenderer/Templates/Space.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/Space.jinja2s
 new file mode 100644
-index 0000000..577be0a
+index 0000000..6295883
 --- /dev/null
 +++ b/plasTeX/Renderers/NotesRenderer/Templates/Space.jinja2s
 @@ -0,0 +1,16 @@
@@ -921,10 +921,10 @@ index 0000000..f87c900
 +<span class="doublebox">{{ obj }}</span>
 diff --git a/plasTeX/Renderers/NotesRenderer/Templates/float.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/float.jinja2s
 new file mode 100644
-index 0000000..bb3d348
+index 0000000..a97e03a
 --- /dev/null
 +++ b/plasTeX/Renderers/NotesRenderer/Templates/float.jinja2s
-@@ -0,0 +1,1 @@
+@@ -0,0 +1 @@
 +name: newfloat floatstyle restylefloat floatname floatplacement listof
 diff --git a/plasTeX/Renderers/NotesRenderer/Templates/graphicx.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/graphicx.jinja2s
 new file mode 100644
@@ -1060,7 +1060,7 @@ index 0000000..2712124
 +{{ obj.text }}
 diff --git a/plasTeX/Renderers/NotesRenderer/Templates/listings.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/listings.jinja2s
 new file mode 100644
-index 0000000..e0da7ac
+index 0000000..1eb4160
 --- /dev/null
 +++ b/plasTeX/Renderers/NotesRenderer/Templates/listings.jinja2s
 @@ -0,0 +1,20 @@
