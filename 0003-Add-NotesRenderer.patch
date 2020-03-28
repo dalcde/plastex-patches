@@ -1,4 +1,4 @@
-From 1834dee737e55bfcd6a937dc73464b74404a5cd6 Mon Sep 17 00:00:00 2001
+From 4f027059398df0775b278f72b6569e9d778d64d2 Mon Sep 17 00:00:00 2001
 From: Dexter Chua <dalcde@yahoo.com.hk>
 Date: Sun, 22 Mar 2020 17:20:00 +0800
 Subject: [PATCH 3/4] Add NotesRenderer
@@ -8,108 +8,36 @@ This is based on the HTML5 and PageTemplate Renderers
 The katex version is 0.11.1
 ---
  plasTeX/Renderers/NotesRenderer/Config.py     |  57 ++
- plasTeX/Renderers/NotesRenderer/README.md     |   4 +
+ plasTeX/Renderers/NotesRenderer/README.md     |   5 +
  plasTeX/Renderers/NotesRenderer/TODO          |   7 +
- .../NotesRenderer/Templates/Alignment.jinja2s |  11 +
- .../NotesRenderer/Templates/Arrays.jinja2s    |  27 +
  .../Templates/Bibliography.jinja2s            |  29 +
- .../NotesRenderer/Templates/Boxes.jinja2s     |  13 +
- .../NotesRenderer/Templates/Breaking.jinja2s  |   2 +
- .../NotesRenderer/Templates/Crossref.jinja2s  |   7 +
  .../NotesRenderer/Templates/Custom.jinja2s    |   2 +
- .../NotesRenderer/Templates/Floats.jinja2s    |  19 +
- .../Templates/FontSelection.jinja2s           |  88 +++
- .../NotesRenderer/Templates/Footnotes.jinja2s |  11 +
  .../NotesRenderer/Templates/Index.jinja2s     |  41 ++
- .../NotesRenderer/Templates/Lists.jinja2s     |  21 +
  .../NotesRenderer/Templates/Math.jinja2s      |  16 +
  .../NotesRenderer/Templates/Misc.jinja2s      |  20 +
- .../NotesRenderer/Templates/Pictures.jinja2s  |  10 +
- .../Templates/Primitives.jinja2s              |  12 +
- .../Templates/Quotations.jinja2s              |   8 +
  .../Templates/Sectioning.jinja2s              |  56 ++
- .../NotesRenderer/Templates/Sentences.jinja2s |  50 ++
- .../NotesRenderer/Templates/Space.jinja2s     |  16 +
- .../NotesRenderer/Templates/Tabbing.jinja2s   |  10 +
  .../NotesRenderer/Templates/Thms.jinja2s      |  29 +
  .../NotesRenderer/Templates/Tikz.jinja2s      |   8 +
- .../NotesRenderer/Templates/Verbatim.jinja2s  |   5 +
- .../NotesRenderer/Templates/alltt.jinja2      |   1 +
- .../NotesRenderer/Templates/babel.jinja2s     |   2 +
- .../NotesRenderer/Templates/changebar.jinja2s |   5 +
- .../NotesRenderer/Templates/color.jinja2s     |   4 +
- .../NotesRenderer/Templates/embed.jinja2s     |   2 +
- .../NotesRenderer/Templates/fancybox.jinja2s  |   8 +
- .../NotesRenderer/Templates/float.jinja2s     |   1 +
- .../NotesRenderer/Templates/graphicx.jinja2s  |   8 +
- .../NotesRenderer/Templates/html.jinja2s      |  14 +
  .../NotesRenderer/Templates/hyperref.jinja2s  |  71 ++
- .../NotesRenderer/Templates/ifthen.jinja2s    |   7 +
- .../NotesRenderer/Templates/lipsum.jinja2s    |   2 +
- .../NotesRenderer/Templates/listings.jinja2s  |  20 +
- .../NotesRenderer/Templates/longtable.jinja2s |  22 +
- .../NotesRenderer/Templates/memoir.jinja2s    |   2 +
- .../NotesRenderer/Templates/minitoc.jinja2s   |  39 ++
- .../NotesRenderer/Templates/natbib.jinja2s    |  18 +
- .../NotesRenderer/Templates/subfig.jinja2s    |  19 +
  .../NotesRenderer/Templates/text.jinja2s      |   5 +
- .../NotesRenderer/Templates/textcomp.jinja2s  |   3 +
- .../NotesRenderer/Templates/url.jinja2s       |   4 +
- .../NotesRenderer/Templates/wrapfig.jinja2s   |   2 +
- plasTeX/Renderers/NotesRenderer/__init__.py   | 305 +++++++++
+ plasTeX/Renderers/NotesRenderer/__init__.py   | 306 +++++++++
  plasTeX/Renderers/NotesRenderer/katex.min.js  |   1 +
  plasTeX/Renderers/NotesRenderer/layout.jinja2 | 103 +++
  plasTeX/Renderers/NotesRenderer/style.css     | 631 ++++++++++++++++++
- 53 files changed, 1878 insertions(+)
+ 17 files changed, 1387 insertions(+)
  create mode 100644 plasTeX/Renderers/NotesRenderer/Config.py
  create mode 100644 plasTeX/Renderers/NotesRenderer/README.md
  create mode 100644 plasTeX/Renderers/NotesRenderer/TODO
- create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/Alignment.jinja2s
- create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/Arrays.jinja2s
  create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/Bibliography.jinja2s
- create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/Boxes.jinja2s
- create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/Breaking.jinja2s
- create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/Crossref.jinja2s
  create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/Custom.jinja2s
- create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/Floats.jinja2s
- create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/FontSelection.jinja2s
- create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/Footnotes.jinja2s
  create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/Index.jinja2s
- create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/Lists.jinja2s
  create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/Math.jinja2s
  create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/Misc.jinja2s
- create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/Pictures.jinja2s
- create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/Primitives.jinja2s
- create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/Quotations.jinja2s
  create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/Sectioning.jinja2s
- create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/Sentences.jinja2s
- create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/Space.jinja2s
- create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/Tabbing.jinja2s
  create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/Thms.jinja2s
  create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/Tikz.jinja2s
- create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/Verbatim.jinja2s
- create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/alltt.jinja2
- create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/babel.jinja2s
- create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/changebar.jinja2s
- create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/color.jinja2s
- create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/embed.jinja2s
- create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/fancybox.jinja2s
- create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/float.jinja2s
- create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/graphicx.jinja2s
- create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/html.jinja2s
  create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/hyperref.jinja2s
- create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/ifthen.jinja2s
- create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/lipsum.jinja2s
- create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/listings.jinja2s
- create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/longtable.jinja2s
- create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/memoir.jinja2s
- create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/minitoc.jinja2s
- create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/natbib.jinja2s
- create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/subfig.jinja2s
  create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/text.jinja2s
- create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/textcomp.jinja2s
- create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/url.jinja2s
- create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/wrapfig.jinja2s
  create mode 100644 plasTeX/Renderers/NotesRenderer/__init__.py
  create mode 100644 plasTeX/Renderers/NotesRenderer/katex.min.js
  create mode 100755 plasTeX/Renderers/NotesRenderer/layout.jinja2
@@ -180,14 +108,15 @@ index 0000000..4e50fd3
 +)
 diff --git a/plasTeX/Renderers/NotesRenderer/README.md b/plasTeX/Renderers/NotesRenderer/README.md
 new file mode 100644
-index 0000000..d2fa1bb
+index 0000000..9b5c744
 --- /dev/null
 +++ b/plasTeX/Renderers/NotesRenderer/README.md
-@@ -0,0 +1,4 @@
+@@ -0,0 +1,5 @@
 +This is a renderer to be used with plasTeX. It uses server-side javascript
 +rendering, and a copy of katex.min.js should be present in this directory,
-+which can be found at  https://github.com/Khan/KaTeX . This is tested to work
-+with version 0.10.0s-rc1, but is expected to work with future generations
++which can be found at  https://github.com/Khan/KaTeX .
++
++The Templates directory contains templates that differ from HTML5
 diff --git a/plasTeX/Renderers/NotesRenderer/TODO b/plasTeX/Renderers/NotesRenderer/TODO
 new file mode 100644
 index 0000000..0e76472
@@ -201,56 +130,6 @@ index 0000000..0e76472
 +Table of contents number alignment
 +cite brackets - use nbsp
 +Style bibliography properly
-diff --git a/plasTeX/Renderers/NotesRenderer/Templates/Alignment.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/Alignment.jinja2s
-new file mode 100644
-index 0000000..0326810
---- /dev/null
-+++ b/plasTeX/Renderers/NotesRenderer/Templates/Alignment.jinja2s
-@@ -0,0 +1,11 @@
-+name: center centering centerline
-+<div class="centered">{{ obj }}</div>
-+
-+name: flushleft raggedright leftline
-+<div class="flushleft">{{ obj }}</div>
-+
-+name: raggedleft flushright llap
-+<div class="flushright">{{ obj }}</div>
-+
-+name: raggedbottom
-+<div class="raggedbottom">{{ obj }}</div>
-diff --git a/plasTeX/Renderers/NotesRenderer/Templates/Arrays.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/Arrays.jinja2s
-new file mode 100644
-index 0000000..4632ea4
---- /dev/null
-+++ b/plasTeX/Renderers/NotesRenderer/Templates/Arrays.jinja2s
-@@ -0,0 +1,27 @@
-+name: tabular array tabular* tabularx
-+<table class="tabular">
-+{% for row in obj %}
-+  <tr>
-+  {% for cell in row %}
-+  {% if cell.isHeader %}
-+    <th style="{{ cell.style.inline }}"
-+        rowspan="{{ cell.attributes.rowspan }}"
-+        colspan="{{ cell.attributes.colspan}}">
-+      {{ cell }}
-+    </th>
-+  {% else %}
-+    <td  style="{{ cell.style.inline }}"
-+        rowspan="{{ cell.attributes.rowspan }}"
-+        colspan="{{ cell.attributes.colspan }}">
-+      {{ cell }}
-+    </td>
-+  {% endif %}
-+  {% endfor %}
-+  </tr>
-+{% endfor %}
-+</table>
-+
-+name: multicolumn
-+{{ obj }}
-+
-+name: cline toprule bottomrule midrule cmidrule morecmidrules addlinespace specialrule
 diff --git a/plasTeX/Renderers/NotesRenderer/Templates/Bibliography.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/Bibliography.jinja2s
 new file mode 100644
 index 0000000..623b66d
@@ -286,46 +165,6 @@ index 0000000..623b66d
 +
 +name: bibliographyref
 +<a href="{{ obj.idref.bibitem.url }}">{{ obj }}</a>
-diff --git a/plasTeX/Renderers/NotesRenderer/Templates/Boxes.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/Boxes.jinja2s
-new file mode 100644
-index 0000000..74dc6a8
---- /dev/null
-+++ b/plasTeX/Renderers/NotesRenderer/Templates/Boxes.jinja2s
-@@ -0,0 +1,13 @@
-+name: mbox makebox
-+<span class="mbox" style="width: {{ obj.attributes.width }}">{{ obj }}</span>
-+
-+name: fbox framebox
-+<span class="fbox" style="width: {{ obj.attributes.width }}">{{ obj }}</span>
-+
-+name: parbox
-+<span class="parbox" style="width: {{ obj.attributes.width }}">{{ obj }}</span>
-+
-+name: minipage
-+<div class="minipage" style="width: {{ obj.attributes.width }}">{{ obj }}</div>
-+
-+name: raisebox rule
-diff --git a/plasTeX/Renderers/NotesRenderer/Templates/Breaking.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/Breaking.jinja2s
-new file mode 100644
-index 0000000..6c3a361
---- /dev/null
-+++ b/plasTeX/Renderers/NotesRenderer/Templates/Breaking.jinja2s
-@@ -0,0 +1,2 @@
-+name: linebreak \ newline pagebreak newpage clearpage cleardoublepage
-+<br />
-diff --git a/plasTeX/Renderers/NotesRenderer/Templates/Crossref.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/Crossref.jinja2s
-new file mode 100644
-index 0000000..b02c1f0
---- /dev/null
-+++ b/plasTeX/Renderers/NotesRenderer/Templates/Crossref.jinja2s
-@@ -0,0 +1,7 @@
-+name: ref
-+<a href="{{here.idref.label.url}}">{{here.idref.label.ref}}</a>
-+
-+name: pageref
-+<a href="{{ obj.idref.label.url }}">*</a>
-+
-+name: label
 diff --git a/plasTeX/Renderers/NotesRenderer/Templates/Custom.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/Custom.jinja2s
 new file mode 100644
 index 0000000..699d987
@@ -334,142 +173,6 @@ index 0000000..699d987
 @@ -0,0 +1,2 @@
 +name: separator
 +<hr />
-diff --git a/plasTeX/Renderers/NotesRenderer/Templates/Floats.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/Floats.jinja2s
-new file mode 100644
-index 0000000..b9a62f1
---- /dev/null
-+++ b/plasTeX/Renderers/NotesRenderer/Templates/Floats.jinja2s
-@@ -0,0 +1,19 @@
-+name: figure figure*
-+<figure {% if obj.title %}id="{{ obj.title.id }}"{% endif %}>
-+  {{ obj }}
-+</figure>
-+
-+name: table table*
-+<div class="table"  id="{% if obj.title %}{{ obj.title.id}}{% else %}{{ obj.id }}{% endif %}">
-+  {{ obj }}
-+</div>
-+
-+name: marginpar
-+<p class="marginpar">{{ obj.attributes.right }}</p>
-+
-+name: caption
-+<figcaption>
-+  <span class="caption_title">{{ obj.title }}</span>
-+  <span class="caption_ref">{{ obj.ref }}</span>
-+  <span class="caption_text">{{ obj }}</span>
-+</figcaption>
-diff --git a/plasTeX/Renderers/NotesRenderer/Templates/FontSelection.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/FontSelection.jinja2s
-new file mode 100644
-index 0000000..3b72b22
---- /dev/null
-+++ b/plasTeX/Renderers/NotesRenderer/Templates/FontSelection.jinja2s
-@@ -0,0 +1,88 @@
-+name: mdseries textmd
-+<span class="mdseries">{{ obj }}</span>
-+
-+name: bfseries textbf
-+<b class="bfseries">{{ obj }}</b>
-+
-+name: rmfamily textrm
-+<span class="rmfamily">{{ obj }}</span>
-+
-+name: sffamily textsf
-+<span class="sffamily">{{ obj }}</span>
-+
-+name: ttfamily texttt
-+<span class="ttfamily">{{ obj }}</span>
-+
-+name: upshape textup
-+<span class="upshape">{{ obj }}</span>
-+
-+name: itshape textit
-+<i class="itshape">{{ obj }}</i>
-+
-+name: slshape textsl
-+<i class="slshape">{{ obj }}</i>
-+
-+name: scshape textsc
-+<span class="scshape">{{ obj }}</span>
-+
-+name: textnormal
-+<span class="textnormal">{{ obj }}</span>
-+
-+name: rm
-+<span class="rm">{{ obj }}</span>
-+
-+name: cal
-+<i class="cal">{{ obj }}</i>
-+
-+name: it
-+<i class="it">{{ obj }}</i>
-+
-+name: sl
-+<i class="sl">{{ obj }}</i>
-+
-+name: bf
-+<b class="bf">{{ obj }}</b>
-+
-+name: tt
-+<span class="tt">{{ obj }}</span>
-+
-+name: sc
-+<i class="sc">{{ obj }}</i>
-+
-+
-+name: tiny
-+<small class="tiny">{{ obj }}</small>
-+
-+name: scriptsize
-+<small class="scriptsize">{{ obj }}</small>
-+
-+name: footnotesize
-+<small class="footnotesize">{{ obj }}</small>
-+
-+name: small
-+<small class="small">{{ obj }}</small>
-+
-+name: normalsize
-+<span class="normalsize">{{ obj }}</span>
-+
-+name: large
-+<big class="large">{{ obj }}</big>
-+
-+name: Large
-+<big class="xlarge">{{ obj }}</big>
-+
-+name: LARGE
-+<big class="xxlarge">{{ obj }}</big>
-+
-+name: huge
-+<big class="huge">{{ obj }}</big>
-+
-+name: Huge
-+<big class="xhuge">{{ obj }}</big>
-+
-+
-+name: symbol
-+{% if obj.renderer.vectorImager.enabled %}
-+<object type="image/svg+xml" data="{{ obj.vectorImage.url }}" style="width: {{ obj.vectorImage.width.em }}; height: {{ obj.vectorImage.height.em }} vertical-align: {{ obj.vectorImage.depth.em }}">
-+  <img src="obj.image.url" alt="{{ obj.source }}" style="vertical-align: {{ obj.image.depth.px }}; width:{{obj.image.width.px}}; height:{{obj.image.height.px}}" class="symbol gen" />
-+</object>
-diff --git a/plasTeX/Renderers/NotesRenderer/Templates/Footnotes.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/Footnotes.jinja2s
-new file mode 100644
-index 0000000..ebb237e
---- /dev/null
-+++ b/plasTeX/Renderers/NotesRenderer/Templates/Footnotes.jinja2s
-@@ -0,0 +1,11 @@
-+name: footnote
-+<a class="footnote" href="#{{ obj.id }}">
-+  <sup class="footnotemark">{{ obj.mark.attributes.num }}</sup>
-+</a>
-+
-+name: footnotemark
-+<a class="footnote" href="#footnotes">
-+  <sup class="footnotemark">{{ obj.mark.attributes.num }}</sup>
-+</a>
-+
-+name: footnotetext
 diff --git a/plasTeX/Renderers/NotesRenderer/Templates/Index.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/Index.jinja2s
 new file mode 100644
 index 0000000..466deee
@@ -517,33 +220,6 @@ index 0000000..466deee
 +
 +name: see seealso
 +<i>{{ obj.captionName }}</i>{{ obj }}
-diff --git a/plasTeX/Renderers/NotesRenderer/Templates/Lists.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/Lists.jinja2s
-new file mode 100644
-index 0000000..6f387ee
---- /dev/null
-+++ b/plasTeX/Renderers/NotesRenderer/Templates/Lists.jinja2s
-@@ -0,0 +1,21 @@
-+name: itemize
-+<ul class="itemize">
-+{% for item in obj %}
-+  <li>{{ item }}</li>
-+{% endfor %}
-+</ul>
-+
-+name: enumerate
-+<ol class="enumerate">
-+{% for item in obj %}
-+  <li>{{ item }}</li>
-+{% endfor %}
-+</ol>
-+
-+name: list trivlist description
-+<dl class="{{ obj.nodeName }}">
-+{% for item in obj %}
-+  <dt>{{ item.attributes.term or obj.attributes.defaultlabel }}</dt>
-+  <dd>{{ item }}</dd>
-+{% endfor %}
-+</dl>
 diff --git a/plasTeX/Renderers/NotesRenderer/Templates/Math.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/Math.jinja2s
 new file mode 100644
 index 0000000..dfdba50
@@ -592,54 +268,6 @@ index 0000000..2220cdc
 +<img src="{{ obj.image.url }}" alt="{{ obj.source|e }}" />
 +{% endif %}
 +</div>
-diff --git a/plasTeX/Renderers/NotesRenderer/Templates/Pictures.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/Pictures.jinja2s
-new file mode 100644
-index 0000000..2296bf9
---- /dev/null
-+++ b/plasTeX/Renderers/NotesRenderer/Templates/Pictures.jinja2s
-@@ -0,0 +1,10 @@
-+name: picture
-+<div class="picture">
-+{% if obj.renderer.vectorImager.enabled %}
-+<object type="image/svg+xml" data="{{ obj.vectorImage.url }}" style="width: {{ obj.vectorImage.width.em }}; height: {{ obj.vectorImage.height.em }};">
-+{% endif %}
-+<img src="{{ obj.image.url }}" alt="{{ obj.source }}" style="width: {{ obj.image.width.px }}; height: {{obj.image.height.px }}" class="picture gen" />
-+{% if obj.renderer.vectorImager.enabled %}
-+</object>
-+{% endif %}
-+</div>
-diff --git a/plasTeX/Renderers/NotesRenderer/Templates/Primitives.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/Primitives.jinja2s
-new file mode 100644
-index 0000000..89b3a6a
---- /dev/null
-+++ b/plasTeX/Renderers/NotesRenderer/Templates/Primitives.jinja2s
-@@ -0,0 +1,12 @@
-+name: par
-+{% if obj.blockType %}
-+{{ obj }}
-+{% else %}
-+<p>{{ obj }}</p>
-+{% endif %}
-+
-+name: active::^
-+<sup>{{ obj }}</sup>
-+
-+name: active::_
-+<sub>{{ obj }}</sub>
-diff --git a/plasTeX/Renderers/NotesRenderer/Templates/Quotations.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/Quotations.jinja2s
-new file mode 100644
-index 0000000..109e103
---- /dev/null
-+++ b/plasTeX/Renderers/NotesRenderer/Templates/Quotations.jinja2s
-@@ -0,0 +1,8 @@
-+name: quote
-+<blockquote class="quote">{{ obj }}</blockquote>
-+
-+name: quotation
-+<blockquote class="quotation">{{ obj }}</blockquote>
-+
-+name: verse
-+<blockquote class="verse">{{ obj }}</blockquote>
 diff --git a/plasTeX/Renderers/NotesRenderer/Templates/Sectioning.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/Sectioning.jinja2s
 new file mode 100644
 index 0000000..01586bf
@@ -702,100 +330,6 @@ index 0000000..01586bf
 +name: subsubparagraph
 +<h6 id="{{ obj.id }}">{{ obj.fullTrueTitle }}</h6>
 +{{ obj }}
-diff --git a/plasTeX/Renderers/NotesRenderer/Templates/Sentences.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/Sentences.jinja2s
-new file mode 100644
-index 0000000..d3addae
---- /dev/null
-+++ b/plasTeX/Renderers/NotesRenderer/Templates/Sentences.jinja2s
-@@ -0,0 +1,50 @@
-+name: $
-+$
-+
-+name: %
-+%
-+
-+name: {
-+{
-+
-+name: }
-+}
-+
-+name: _
-+_
-+
-+name: &
-+&amp;
-+
-+name: #
-+#
-+
-+name:
-+&#160;
-+
-+name: LaTeX
-+L<sup style="font-variant:small-caps; margin-left:-0.3em">a</sup>T<sub style="text-transform:uppercase; margin-left:-0.2em">e</sub>X
-+
-+name: TeX
-+T<sub style="text-transform:uppercase; margin-left:-0.2em">e</sub>X
-+
-+name: emph em
-+<em>{{ obj }}</em>
-+
-+name: active::~
-+&#160;
-+
-+name: enspace enskip
-+&#8194;
-+
-+name: quad
-+&#8195;
-+
-+name: qquad
-+&#8195;&#8195;
-+
-+name: thinspace /
-+comment: &#8201;
-+
-+name: underbar
-+<span class="underbar">{{ obj }}</span>
-diff --git a/plasTeX/Renderers/NotesRenderer/Templates/Space.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/Space.jinja2s
-new file mode 100644
-index 0000000..6295883
---- /dev/null
-+++ b/plasTeX/Renderers/NotesRenderer/Templates/Space.jinja2s
-@@ -0,0 +1,16 @@
-+name: -hspace
-+<span class="hspace" style="margin-right: {{ obj.attributes.len }}">&nbsp;</span>
-+
-+name: -vspace
-+<div class="vspace" style="margin-bottom: {{ obj.attributes.len }}">&nbsp;</div>
-+
-+name: vspace
-+
-+name: -bigskip
-+<div class="bigskip"></div>
-+
-+name: -medskip
-+<div class="medskip"></div>
-+
-+name: -smallskip
-+<div class="medskip"></div>
-diff --git a/plasTeX/Renderers/NotesRenderer/Templates/Tabbing.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/Tabbing.jinja2s
-new file mode 100644
-index 0000000..4e413bc
---- /dev/null
-+++ b/plasTeX/Renderers/NotesRenderer/Templates/Tabbing.jinja2s
-@@ -0,0 +1,10 @@
-+name: tabbing
-+<div class="tabbing">
-+{% if obj.renderer.vectorImager.enabled %}
-+<object type="image/svg+xml" data="{{ obj.vectorImage.url }}" style="width: {{ obj.vectorImage.width.em }}; height: {{ obj.vectorImage.height.em }};">
-+{% endif %}
-+<img src="{{ obj.image.url }}" alt="{{ obj.source }}" style="width: {{ obj.image.width.px }}; height: {{obj.image.height.px }}" class="tabbing gen" />
-+{% if obj.renderer.vectorImager.enabled %}
-+</object>
-+{% endif %}
-+</div>
 diff --git a/plasTeX/Renderers/NotesRenderer/Templates/Thms.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/Thms.jinja2s
 new file mode 100644
 index 0000000..7317c21
@@ -845,116 +379,6 @@ index 0000000..b1a6e98
 +<img src="{{ obj.image.url }}" alt="{{ obj.source|e }}" />
 +{% endif %}
 +</div>
-diff --git a/plasTeX/Renderers/NotesRenderer/Templates/Verbatim.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/Verbatim.jinja2s
-new file mode 100644
-index 0000000..1131c40
---- /dev/null
-+++ b/plasTeX/Renderers/NotesRenderer/Templates/Verbatim.jinja2s
-@@ -0,0 +1,5 @@
-+name: verbatim
-+<pre class="verbatim">{{ obj }}</pre>
-+
-+name: verb
-+<code class="verbatim">{{ obj }}</code>
-diff --git a/plasTeX/Renderers/NotesRenderer/Templates/alltt.jinja2 b/plasTeX/Renderers/NotesRenderer/Templates/alltt.jinja2
-new file mode 100644
-index 0000000..725b90c
---- /dev/null
-+++ b/plasTeX/Renderers/NotesRenderer/Templates/alltt.jinja2
-@@ -0,0 +1 @@
-+<div class="alltt">{{ obj }}</div>
-diff --git a/plasTeX/Renderers/NotesRenderer/Templates/babel.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/babel.jinja2s
-new file mode 100644
-index 0000000..aafb5ae
---- /dev/null
-+++ b/plasTeX/Renderers/NotesRenderer/Templates/babel.jinja2s
-@@ -0,0 +1,2 @@
-+name: foreignlanguage otherlanguage
-+{{ obj }}
-diff --git a/plasTeX/Renderers/NotesRenderer/Templates/changebar.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/changebar.jinja2s
-new file mode 100644
-index 0000000..45f4f45
---- /dev/null
-+++ b/plasTeX/Renderers/NotesRenderer/Templates/changebar.jinja2s
-@@ -0,0 +1,5 @@
-+name: changebar
-+<div class="changebar">{{ obj }}</div>
-+
-+name: cbdelete
-+<span class="deletebar">&#9632;</span>
-diff --git a/plasTeX/Renderers/NotesRenderer/Templates/color.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/color.jinja2s
-new file mode 100644
-index 0000000..c59b877
---- /dev/null
-+++ b/plasTeX/Renderers/NotesRenderer/Templates/color.jinja2s
-@@ -0,0 +1,4 @@
-+name: color textcolor colorbox fcolorbox
-+<span style="{{ obj.style.inline }}">{{ obj }}</span>
-+
-+name: pagecolor definecolor
-diff --git a/plasTeX/Renderers/NotesRenderer/Templates/embed.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/embed.jinja2s
-new file mode 100644
-index 0000000..4e39853
---- /dev/null
-+++ b/plasTeX/Renderers/NotesRenderer/Templates/embed.jinja2s
-@@ -0,0 +1,2 @@
-+name: HTML XHTML html xhtml
-+{{ obj }}
-diff --git a/plasTeX/Renderers/NotesRenderer/Templates/fancybox.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/fancybox.jinja2s
-new file mode 100644
-index 0000000..f87c900
---- /dev/null
-+++ b/plasTeX/Renderers/NotesRenderer/Templates/fancybox.jinja2s
-@@ -0,0 +1,8 @@
-+name: fbox ovalbox Ovalbox
-+<span class="ovalbox">{{ obj }}</span>
-+
-+name: shadowbox
-+<span class="shadowbox">{{ obj }}</span>
-+
-+name: doublebox
-+<span class="doublebox">{{ obj }}</span>
-diff --git a/plasTeX/Renderers/NotesRenderer/Templates/float.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/float.jinja2s
-new file mode 100644
-index 0000000..a97e03a
---- /dev/null
-+++ b/plasTeX/Renderers/NotesRenderer/Templates/float.jinja2s
-@@ -0,0 +1 @@
-+name: newfloat floatstyle restylefloat floatname floatplacement listof
-diff --git a/plasTeX/Renderers/NotesRenderer/Templates/graphicx.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/graphicx.jinja2s
-new file mode 100644
-index 0000000..07f6611
---- /dev/null
-+++ b/plasTeX/Renderers/NotesRenderer/Templates/graphicx.jinja2s
-@@ -0,0 +1,8 @@
-+name: includegraphics rotatebox scalebox reflectbox resizebox
-+{% if obj.style %}
-+<img src="{{ obj.image.url}}" alt="{{ obj.source }}" style="{{ obj.style.inline}}" />
-+{% else %}
-+<img src="{{ obj.image.url}}" alt="{{ obj.source }}" style="width: {{ obj.image.width.px }}; height: {{ obj.image.height.px }}" />
-+{% endif %}
-+
-+name: DeclareGraphicsExtensions graphicspath
-diff --git a/plasTeX/Renderers/NotesRenderer/Templates/html.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/html.jinja2s
-new file mode 100644
-index 0000000..d5f2f0f
---- /dev/null
-+++ b/plasTeX/Renderers/NotesRenderer/Templates/html.jinja2s
-@@ -0,0 +1,14 @@
-+name: htmladdnormallink
-+<a href="{{obj.attributes.url }}" >{{ obj }}</a>
-+
-+name: htmladdimg
-+<img src="{{obj.attributes.url }}" />
-+
-+name: rawhtml
-+{{ obj }}
-+
-+name: htmlonly latexhtml
-+{{ obj }}
-+
-+name: htmlref hyperref
-+<a href="{{obj.idref.label.url }}" >{{ obj }}</a>
 diff --git a/plasTeX/Renderers/NotesRenderer/Templates/hyperref.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/hyperref.jinja2s
 new file mode 100644
 index 0000000..d81a6a8
@@ -1032,183 +456,6 @@ index 0000000..d81a6a8
 +
 +name: tph
 +{{ obj.argSources['html'][1:-1] }}
-diff --git a/plasTeX/Renderers/NotesRenderer/Templates/ifthen.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/ifthen.jinja2s
-new file mode 100644
-index 0000000..ea11d1f
---- /dev/null
-+++ b/plasTeX/Renderers/NotesRenderer/Templates/ifthen.jinja2s
-@@ -0,0 +1,7 @@
-+name: ifthenelse
-+{{ obj.attributes.else }}
-+
-+name: newboolean provideboolean setboolean
-+
-+name: whiledo
-+{{ obj.attributes.operations }}
-diff --git a/plasTeX/Renderers/NotesRenderer/Templates/lipsum.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/lipsum.jinja2s
-new file mode 100644
-index 0000000..2712124
---- /dev/null
-+++ b/plasTeX/Renderers/NotesRenderer/Templates/lipsum.jinja2s
-@@ -0,0 +1,2 @@
-+name:lipsum
-+{{ obj.text }}
-diff --git a/plasTeX/Renderers/NotesRenderer/Templates/listings.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/listings.jinja2s
-new file mode 100644
-index 0000000..1eb4160
---- /dev/null
-+++ b/plasTeX/Renderers/NotesRenderer/Templates/listings.jinja2s
-@@ -0,0 +1,20 @@
-+name:lstset
-+
-+name:lstinputlisting lstlisting
-+{% if obj.attributes.arguments.caption %}
-+<div class="caption" id="{{ obj.attributes.arguments.label }}">
-+  <b>{{ obj.captionName } {{ obj.ref }}</b>:
-+  {{ obj.attributes.arguments.caption }}
-+</div>
-+{% if obj.xhtml_listing  %}
-+{{ obj.xhtml_listing  }}
-+{% else %}
-+<pre>{{ obj.plain_listing }}</pre>
-+{% endif %}
-+
-+name: lstinline
-+{% if obj.xhtml_listing  %}
-+{{ obj.xhtml_listing  }}
-+{% else %}
-+<pre>{{ obj.plain_listing }}</pre>
-+{% endif %}
-diff --git a/plasTeX/Renderers/NotesRenderer/Templates/longtable.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/longtable.jinja2s
-new file mode 100644
-index 0000000..0617e42
---- /dev/null
-+++ b/plasTeX/Renderers/NotesRenderer/Templates/longtable.jinja2s
-@@ -0,0 +1,22 @@
-+name: longtable
-+<div id="{{ obj.title.id }}">
-+{% if obj.title %}
-+<div class="caption">
-+  <span class="table-label">{{ obj.title.title }} {{ obj.title.ref }}</span>
-+  <span class="table-caption">{{ obj.title }}</span>
-+</div>
-+{% endif %}
-+<table class="tabular">
-+{% for row in obj %}
-+<tr>
-+{% for cell in row %}
-+  {% if cell.isHeader %}
-+  <th style="{{ cell.style.inline}}" rowspan="{{ cell.attributes.rowspan }}" colspan={{ cell.attributes.colspan }}">{{ cell }}</th>
-+  {% else %}
-+  <td style="{{ cell.style.inline}}" rowspan="{{ cell.attributes.rowspan }}" colspan={{ cell.attributes.colspan }}">{{ cell }}</td>
-+  {% endif %}
-+{% endfor %}
-+{% endfor %}
-+</tr>
-+</table>
-+</div>
-diff --git a/plasTeX/Renderers/NotesRenderer/Templates/memoir.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/memoir.jinja2s
-new file mode 100644
-index 0000000..dde7159
---- /dev/null
-+++ b/plasTeX/Renderers/NotesRenderer/Templates/memoir.jinja2s
-@@ -0,0 +1,2 @@
-+name: titleref
-+<a href="{{ obj.idref.label.url }}">{{ obj.idref.label.title }}</a>
-diff --git a/plasTeX/Renderers/NotesRenderer/Templates/minitoc.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/minitoc.jinja2s
-new file mode 100644
-index 0000000..1a89114
---- /dev/null
-+++ b/plasTeX/Renderers/NotesRenderer/Templates/minitoc.jinja2s
-@@ -0,0 +1,39 @@
-+name: dominitoc dominilof dominilot dosecttoc dosectlot dosectlof \
-+      doparttoc dopartlot dopartlof mtcprepare mtcsetfont mtcsetdepth \
-+      mtcskip mtcskipamount tightmtcfalse tightmtctrue ktightmtcfalse \
-+      ktightmtctrue undottedmtctrue undottedmtcfalse addstarredpart \
-+      addstarredsection addstarredchapter adjustptc adjustmtc adjust stc \
-+      decrementptc decrementmtc decrementstc incrementptc incrementstc \
-+      incrementmtc mtcaddpart mtcaddchapter mtcaddsection mtctitle \
-+      mlftitle mlttitle ptctitle plftitle plttitle stctitle slttitle \
-+      mtcsettitle mtcsettitlefont mtcsetformat mtcsetrules ptcrule \
-+      noptcrule mtcrule nomtcrule stcrule nostcrule plfrule noplfrule \
-+      mlfrule nomlfrule slfrule noslfrule pltrule nopltrule mltrule \
-+      nomltrule sltrule nosltrule mtcsetpagenumbers ptcpagenumbers \
-+      noptcpagenumbers plfpagenumbers noplfpagenumbers pltpagenumbers \
-+      nopltpagenumbers mtcpagenumbers nomtcpagenumbers mlfpagenumbers \
-+      nomlfpagenumbers mltpagenumbers nomltpagenumbers stcpagenumbers \
-+      nostcpagenumbers slfpagenumbers noslfpagenumbers sltpagenumbers \
-+      nosltpagenumbers mtcsetfeature firstpartis firstchapteris \
-+      firstsectionis mtcfixglossary mtcfixindex faketableofcontents \
-+      fakelistoffigures fakelistoftables mtcselectlanguage
-+
-+name: minilof sectlof partlof
-+
-+name: minilot sectlot partlot minitoc secttoc parttoc
-+
-+name: -minitoc -secttoc -parttoc
-+<p><b>{{ obj.title }}</b></p>
-+<div tal:condition="obj.tableofcontents" class="minitoc">
-+<ul>
-+{% for section in obj.tableofcontents recursive %}
-+<li><a href="{{ section.url }}" >{{ section.fullTocEntry }}</a>
-+   {% if section.tableofcontents %}
-+   <ul>
-+   {% loop(section.tableofcontents) %}
-+   </ul>
-+   {% endif %}
-+</li>
-+{% endfor %}
-+</ul>
-+</div>
-diff --git a/plasTeX/Renderers/NotesRenderer/Templates/natbib.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/natbib.jinja2s
-new file mode 100644
-index 0000000..0a07470
---- /dev/null
-+++ b/plasTeX/Renderers/NotesRenderer/Templates/natbib.jinja2s
-@@ -0,0 +1,18 @@
-+name: cite citet citep citealt citealp citeauthor citeyear citeyearpar \
-+      Cite Citet Citep Citealt Citealp Citeauthor citefullauthor citetalias \
-+      citepalias
-+type: xml
-+<span class="cite">
-+{% for item in obj.citation() %}
-+	{% if item.idref and item.idref.bibitem.url %}
-+	<a href="{{ item.idref.bibitem.url }}" >{{ item }}</a>
-+	{% else %}
-+	{{ item }}
-+	{% endif %}
-+{% endfor %}
-+</span>
-+
-+name: citetext
-+{{ obj }}
-+
-+name: newblock nocite defcitealias
-diff --git a/plasTeX/Renderers/NotesRenderer/Templates/subfig.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/subfig.jinja2s
-new file mode 100644
-index 0000000..714122d
---- /dev/null
-+++ b/plasTeX/Renderers/NotesRenderer/Templates/subfig.jinja2s
-@@ -0,0 +1,19 @@
-+name: subfloat subfig subfigure subtable
-+<figure class="{{ obj.nodeName }}" id="{{ obj.id }}">
-+{{ obj }}
-+{% if obj.title or obj.subref %}
-+<figcaption>
-+{% if obj.subref %}
-+<span class="subref">{{ obj.subref }}</span>
-+{% endif %}
-+{% if obj.title %}
-+<span class="subcaption">{{ obj.title }}</span>
-+{% endif %}
-+</figcaption>
-+{% endif %}
-+</figure>
-+
-+name: subref subref*
-+<a href="{{ obj.idref.label.url }}">{{ obj.idref.label.subref }}</a>
-+
-+name: newsubfloat DeclareCaptionListOfFormat listsubcaptions captionsetup clearcaptionsetup ContinuedFloat
 diff --git a/plasTeX/Renderers/NotesRenderer/Templates/text.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/text.jinja2s
 new file mode 100644
 index 0000000..8cff59e
@@ -1220,39 +467,12 @@ index 0000000..8cff59e
 +
 +name: textsubscript
 +<sub>{{ obj }}</sub>
-diff --git a/plasTeX/Renderers/NotesRenderer/Templates/textcomp.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/textcomp.jinja2s
-new file mode 100644
-index 0000000..a08d870
---- /dev/null
-+++ b/plasTeX/Renderers/NotesRenderer/Templates/textcomp.jinja2s
-@@ -0,0 +1,3 @@
-+name: newtie capitaltie capitaldieresis capitalbreve capitalnewtie \
-+      capitalgrave capitaldotaccent capitalcedilla
-+alias: .
-diff --git a/plasTeX/Renderers/NotesRenderer/Templates/url.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/url.jinja2s
-new file mode 100644
-index 0000000..e345a49
---- /dev/null
-+++ b/plasTeX/Renderers/NotesRenderer/Templates/url.jinja2s
-@@ -0,0 +1,4 @@
-+name: -url email path
-+<a href="{{ obj }}">{{ obj }}</a>
-+
-+name: urldef urlstyle DeclareUrlCommand
-diff --git a/plasTeX/Renderers/NotesRenderer/Templates/wrapfig.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/wrapfig.jinja2s
-new file mode 100644
-index 0000000..fbdaf85
---- /dev/null
-+++ b/plasTeX/Renderers/NotesRenderer/Templates/wrapfig.jinja2s
-@@ -0,0 +1,2 @@
-+name: wrapfigure wraptable
-+<div style="float: {{ obj.float }}">>{{ obj }}</div>
 diff --git a/plasTeX/Renderers/NotesRenderer/__init__.py b/plasTeX/Renderers/NotesRenderer/__init__.py
 new file mode 100644
-index 0000000..50e6049
+index 0000000..88624b1
 --- /dev/null
 +++ b/plasTeX/Renderers/NotesRenderer/__init__.py
-@@ -0,0 +1,305 @@
+@@ -0,0 +1,306 @@
 +#!/usr/bin/env python
 +
 +import sys, os, re, shutil
@@ -1354,6 +574,7 @@ index 0000000..50e6049
 +
 +        # Load package templates
 +        cwd = os.path.dirname(sys.modules[self.__module__].__file__)
++        self.importDirectory(os.path.join(cwd, "../HTML5"))
 +        self.importDirectory(os.path.join(cwd, "Templates"))
 +
 +        # Load main template
