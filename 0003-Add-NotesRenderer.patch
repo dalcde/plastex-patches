@@ -1,4 +1,4 @@
-From 4f027059398df0775b278f72b6569e9d778d64d2 Mon Sep 17 00:00:00 2001
+From a9c97dda6841c6e512818fb10a9532e3fb15eea4 Mon Sep 17 00:00:00 2001
 From: Dexter Chua <dalcde@yahoo.com.hk>
 Date: Sun, 22 Mar 2020 17:20:00 +0800
 Subject: [PATCH 3/4] Add NotesRenderer
@@ -11,20 +11,19 @@ The katex version is 0.11.1
  plasTeX/Renderers/NotesRenderer/README.md     |   5 +
  plasTeX/Renderers/NotesRenderer/TODO          |   7 +
  .../Templates/Bibliography.jinja2s            |  29 +
- .../NotesRenderer/Templates/Custom.jinja2s    |   2 +
- .../NotesRenderer/Templates/Index.jinja2s     |  41 ++
+ .../NotesRenderer/Templates/Custom.jinja2s    |  14 +
+ .../NotesRenderer/Templates/Index.jinja2s     |   2 +
  .../NotesRenderer/Templates/Math.jinja2s      |  16 +
- .../NotesRenderer/Templates/Misc.jinja2s      |  20 +
- .../Templates/Sectioning.jinja2s              |  56 ++
- .../NotesRenderer/Templates/Thms.jinja2s      |  29 +
+ .../Templates/Sectioning.jinja2s              |  28 +
+ .../NotesRenderer/Templates/Thms.jinja2s      |  26 +
  .../NotesRenderer/Templates/Tikz.jinja2s      |   8 +
- .../NotesRenderer/Templates/hyperref.jinja2s  |  71 ++
+ .../NotesRenderer/Templates/hyperref.jinja2s  |   5 +
  .../NotesRenderer/Templates/text.jinja2s      |   5 +
  plasTeX/Renderers/NotesRenderer/__init__.py   | 306 +++++++++
  plasTeX/Renderers/NotesRenderer/katex.min.js  |   1 +
  plasTeX/Renderers/NotesRenderer/layout.jinja2 | 103 +++
  plasTeX/Renderers/NotesRenderer/style.css     | 631 ++++++++++++++++++
- 17 files changed, 1387 insertions(+)
+ 16 files changed, 1243 insertions(+)
  create mode 100644 plasTeX/Renderers/NotesRenderer/Config.py
  create mode 100644 plasTeX/Renderers/NotesRenderer/README.md
  create mode 100644 plasTeX/Renderers/NotesRenderer/TODO
@@ -32,7 +31,6 @@ The katex version is 0.11.1
  create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/Custom.jinja2s
  create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/Index.jinja2s
  create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/Math.jinja2s
- create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/Misc.jinja2s
  create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/Sectioning.jinja2s
  create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/Thms.jinja2s
  create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/Tikz.jinja2s
@@ -167,59 +165,32 @@ index 0000000..623b66d
 +<a href="{{ obj.idref.bibitem.url }}">{{ obj }}</a>
 diff --git a/plasTeX/Renderers/NotesRenderer/Templates/Custom.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/Custom.jinja2s
 new file mode 100644
-index 0000000..699d987
+index 0000000..1e13cab
 --- /dev/null
 +++ b/plasTeX/Renderers/NotesRenderer/Templates/Custom.jinja2s
-@@ -0,0 +1,2 @@
+@@ -0,0 +1,14 @@
 +name: separator
 +<hr />
++
++name: useimager
++<div class="imager_output">
++{% if obj.renderer.vectorImager.enabled %}
++<img src="{{ obj.vectorImage.url }}" alt="{{ obj.source|e }}" />
++{% else %}
++<img src="{{ obj.image.url }}" alt="{{ obj.source|e }}" />
++{% endif %}
++</div>
++
++name: fakeqed
++<span class="qedhere">&squ;</span><span class="clear"></span>
 diff --git a/plasTeX/Renderers/NotesRenderer/Templates/Index.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/Index.jinja2s
 new file mode 100644
-index 0000000..466deee
+index 0000000..20173c3
 --- /dev/null
 +++ b/plasTeX/Renderers/NotesRenderer/Templates/Index.jinja2s
-@@ -0,0 +1,41 @@
-+name: theindex printindex
-+{% set groups = obj.groups %}
-+<h1>{{ obj.title }}</h1>
-+
-+<nav class="index-groups">
-+{% for group in groups %}
-+<a href="#{{ group.id }}" class="{% if loop.last %}index-group-last{% else %}index-group{% endif %}">{{ group.title }}</a>
-+{% endfor %}
-+</nav>
-+
-+{% if obj %}
-+{% for group in groups %}
-+<section class="theindex">
-+
-+<h2 id="{{ group.id}}">{{ group.title }}</h2>
-+{% for column in group %}
-+<ul class="index-column">
-+{% for item in column recursive %}
-+  <li>
-+    <span class="index-item">{{ item.key }}</span>,
-+    {% for page in item.pages %}
-+    <a href="{{ page.url }}" title="{{ page.currentSection.title | striptags }}" class="{% if loop.last %}index-page-last{% else %}index-page{% endif %}">{{ page }}</a>
-+    {% endfor %}
-+    {% if item %}
-+      <ul class="index-subitem-{{ loop.depth }}">
-+      {{ loop(item) }}
-+      </ul>
-+    {% endif %}
-+  </li>
-+{% endfor %}
-+</ul>
-+{% endfor %}
-+</section>
-+{% endfor %}
-+{% endif %}
-+
+@@ -0,0 +1,2 @@
 +name: index
 +{#<a name="{{ obj.id }}" id="{{ obj.id}}"></a>#}
-+
-+name: see seealso
-+<i>{{ obj.captionName }}</i>{{ obj }}
 diff --git a/plasTeX/Renderers/NotesRenderer/Templates/Math.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/Math.jinja2s
 new file mode 100644
 index 0000000..dfdba50
@@ -242,66 +213,12 @@ index 0000000..dfdba50
 +  <div class="equation_content">{{ obj.displayMath }}</div>
 +  <span class="equation_label">( {{ obj.ref }} )</span>
 +</div>
-diff --git a/plasTeX/Renderers/NotesRenderer/Templates/Misc.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/Misc.jinja2s
-new file mode 100644
-index 0000000..2220cdc
---- /dev/null
-+++ b/plasTeX/Renderers/NotesRenderer/Templates/Misc.jinja2s
-@@ -0,0 +1,20 @@
-+name: egroup
-+
-+name: bgroup
-+{{ obj }}
-+
-+name: tableofcontents input @vobeyspaces @noligs def protect let \
-+      newcommand hfill hline openout renewcommand write hspace appendix \
-+      global noindent include markboth setcounter refstepcounter \
-+      medskip smallskip parindent indent setlength settowidth addtolength \
-+      nopagebreak newwrite newcounter typeout sloppypar hfil thispagestyle vfill \
-+      hypertarget reversemarginpar marginnote
-+
-+name: useimager
-+<div class="imager_output">
-+{% if obj.renderer.vectorImager.enabled %}
-+<img src="{{ obj.vectorImage.url }}" alt="{{ obj.source|e }}" />
-+{% else %}
-+<img src="{{ obj.image.url }}" alt="{{ obj.source|e }}" />
-+{% endif %}
-+</div>
 diff --git a/plasTeX/Renderers/NotesRenderer/Templates/Sectioning.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/Sectioning.jinja2s
 new file mode 100644
-index 0000000..01586bf
+index 0000000..b0fb404
 --- /dev/null
 +++ b/plasTeX/Renderers/NotesRenderer/Templates/Sectioning.jinja2s
-@@ -0,0 +1,56 @@
-+name: abstract
-+<div class="abstract">{{ obj }}</div>
-+
-+name: title author date thanks
-+
-+name: maketitle
-+{% set metadata=obj.ownerDocument.userdata %}
-+<div class="titlepage">
-+<h1>{{ metadata.title }}</h1>
-+{% if metadata.author %}
-+<p class="authors">
-+{%for author in metadata.author %}
-+<span class="author">{{ author }}</span>
-+{% endfor %}
-+</p>
-+{% endif %}
-+{% if metadata.date %}
-+<p class="date">{{ metadata.date }}</p>
-+{% endif %}
-+{% if metadata.thanks %}
-+<p class="thanks">{{ metadata.thanks }}</p>
-+{% endif %}
-+</div>
-+
-+
-+name: document
-+{{ obj }}
-+
+@@ -0,0 +1,28 @@
 +name: part chapter section
 +<h1 id="{{ obj.id }}">{{ obj.fullTrueTitle }}</h1>
 +{{ obj }}
@@ -332,10 +249,10 @@ index 0000000..01586bf
 +{{ obj }}
 diff --git a/plasTeX/Renderers/NotesRenderer/Templates/Thms.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/Thms.jinja2s
 new file mode 100644
-index 0000000..7317c21
+index 0000000..05e4f44
 --- /dev/null
 +++ b/plasTeX/Renderers/NotesRenderer/Templates/Thms.jinja2s
-@@ -0,0 +1,29 @@
+@@ -0,0 +1,26 @@
 +name: thmenv
 +<div class="{{ obj.thmName }}_thmwrapper" id="{{ obj.id }}">
 +  <div class="{{ obj.thmName }}_thmheading">
@@ -362,9 +279,6 @@ index 0000000..7317c21
 +  <span class="clear"></span>
 +  </div>
 +</div>
-+
-+name: fakeqed
-+<span class="qedhere">&squ;</span><span class="clear"></span>
 diff --git a/plasTeX/Renderers/NotesRenderer/Templates/Tikz.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/Tikz.jinja2s
 new file mode 100644
 index 0000000..b1a6e98
@@ -381,76 +295,10 @@ index 0000000..b1a6e98
 +</div>
 diff --git a/plasTeX/Renderers/NotesRenderer/Templates/hyperref.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/hyperref.jinja2s
 new file mode 100644
-index 0000000..d81a6a8
+index 0000000..f1888f2
 --- /dev/null
 +++ b/plasTeX/Renderers/NotesRenderer/Templates/hyperref.jinja2s
-@@ -0,0 +1,71 @@
-+name: href
-+<a href ="{{ obj.attributes.url}}">{{ obj }}</a>
-+
-+name: url
-+<a href="{{ obj.attributes.url or obj }}">{{ obj.attributes.url or obj }}</a>
-+
-+name: nolinkurl
-+{{ obj.attributes.url }}
-+
-+name: hyperbaseurl
-+
-+name: hyperimage
-+<img src="{{ obj.attributes.url }}" />
-+
-+name: hyperdef
-+<a name="{{ obj.attributes.category }}.{{ obj.attributes.name }}" >{{ obj }}</a>
-+
-+name: hyperref
-+<a href="{{ obj.attributes.url }}#{{ obj.attributes.category }}.{{ obj.attributes.name}}" >{{ obj }}</a>
-+
-+name: hyperlink
-+<a href="{{ obj.idref.label.url }}" >{{ obj }}</a>
-+
-+name: hypertarget
-+<a name="{{ obj.id }}" >{{ obj }}</a>
-+
-+name: phantomsection
-+<a name="{{ obj.id }}"></a>
-+
-+name: autoref
-+<a href="{{ obj.idref.label.url }}" >{{ obj.idref.label.captionName}} {{ obj.idref.label.ref }}</a>
-+
-+name: Form
-+<form action="{{ obj.attributes.parameters.action }}" method="{{ obj.attributes.parameters.method }}" >{{ obj }}</form>
-+
-+name: TextField
-+<label for="{{ obj.id }}" >{{ obj.attributes.label }}</label>
-+<input name="{{ obj.attributes.parameters.name or obj.attributes.label }}" id="{{ obj.id }}" />
-+
-+name: CheckBox
-+<label for="{{ obj.id }}" >{{ obj.attributes.label }}</label>
-+<input type="checkbox" name="{{ obj.attributes.parameters.name or obj.attributes.label }}" id="{{ obj.id }}" />
-+
-+name: ChoiceMenu
-+<label for="{{ obj.id }}" >{{ obj.attributes.label }}</label>
-+<select name="{{ obj.attributes.parameters.name or obj.attributes.label }}" id="{{ obj.id }}">
-+{% for choice in obj.attributes.choices %}
-+  <option>{{ choice }}</option>
-+{% endfor %}
-+</select>
-+
-+name: PushButton
-+<input type="button" name="{{ obj.attributes.parameters.name or obj.attributes.label}}" id="{{ obj.id }}" value="{{ obj.attributes.label }}" />
-+
-+name: Submit
-+<input type="submit" name="{{ obj.attributes.parameters.name or obj.attributes.label}}" id="{{ obj.id }}" value="{{ obj.attributes.label }}" />
-+
-+name: Reset
-+<input type="reset" name="{{ obj.attributes.parameters.name or obj.attributes.label}}" id="{{ obj.id }}" value="{{ obj.attributes.label }}" />
-+
-+name: ref*
-+<span >{{ obj.idref.label.ref }}</span>
-+
-+name: pageref*
-+*
-+
+@@ -0,0 +1,5 @@
 +name: texorpdfstring
 +{{ obj.argSources['tex'][1:-1] }}
 +
