@@ -1,4 +1,4 @@
-From a9c97dda6841c6e512818fb10a9532e3fb15eea4 Mon Sep 17 00:00:00 2001
+From 2a8777386734ffc6f2bd4a44d0fd44cff854aae6 Mon Sep 17 00:00:00 2001
 From: Dexter Chua <dalcde@yahoo.com.hk>
 Date: Sun, 22 Mar 2020 17:20:00 +0800
 Subject: [PATCH 3/4] Add NotesRenderer
@@ -19,11 +19,11 @@ The katex version is 0.11.1
  .../NotesRenderer/Templates/Tikz.jinja2s      |   8 +
  .../NotesRenderer/Templates/hyperref.jinja2s  |   5 +
  .../NotesRenderer/Templates/text.jinja2s      |   5 +
- plasTeX/Renderers/NotesRenderer/__init__.py   | 306 +++++++++
+ plasTeX/Renderers/NotesRenderer/__init__.py   | 297 +++++++++
  plasTeX/Renderers/NotesRenderer/katex.min.js  |   1 +
  plasTeX/Renderers/NotesRenderer/layout.jinja2 | 103 +++
  plasTeX/Renderers/NotesRenderer/style.css     | 631 ++++++++++++++++++
- 16 files changed, 1243 insertions(+)
+ 16 files changed, 1234 insertions(+)
  create mode 100644 plasTeX/Renderers/NotesRenderer/Config.py
  create mode 100644 plasTeX/Renderers/NotesRenderer/README.md
  create mode 100644 plasTeX/Renderers/NotesRenderer/TODO
@@ -317,10 +317,10 @@ index 0000000..8cff59e
 +<sub>{{ obj }}</sub>
 diff --git a/plasTeX/Renderers/NotesRenderer/__init__.py b/plasTeX/Renderers/NotesRenderer/__init__.py
 new file mode 100644
-index 0000000..88624b1
+index 0000000..0cdf3b7
 --- /dev/null
 +++ b/plasTeX/Renderers/NotesRenderer/__init__.py
-@@ -0,0 +1,306 @@
+@@ -0,0 +1,297 @@
 +#!/usr/bin/env python
 +
 +import sys, os, re, shutil
@@ -375,15 +375,6 @@ index 0000000..88624b1
 +        return tpl.render(tvars)
 +
 +    return renderjinja2
-+
-+class TemplateEngine(object):
-+    def __init__(self, ext, function):
-+        if not isinstance(ext, (list,tuple)):
-+            ext = [ext]
-+        self.ext = ext
-+        self.function = function
-+    def compile(self, *args, **kwargs):
-+        return self.function(*args, **kwargs)
 +
 +class NotesRenderer(BaseRenderer):
 +    """ Renderer for page template based documents """
