@@ -1,4 +1,4 @@
-From 2038630526396a91f05bc25f928dc586fb10c512 Mon Sep 17 00:00:00 2001
+From 82a187f0b7792b0033ea2016834faad83883d5a5 Mon Sep 17 00:00:00 2001
 From: Dexter Chua <dalcde@yahoo.com.hk>
 Date: Sun, 22 Mar 2020 17:20:00 +0800
 Subject: [PATCH 3/4] Add NotesRenderer
@@ -10,7 +10,7 @@ The katex version is 0.11.1
  plasTeX/Renderers/NotesRenderer/Config.py     |  57 ++
  plasTeX/Renderers/NotesRenderer/README.md     |   5 +
  plasTeX/Renderers/NotesRenderer/TODO          |   7 +
- .../Templates/Bibliography.jinja2s            |  29 +
+ .../Templates/Bibliography.jinja2s            |  10 +
  .../NotesRenderer/Templates/Custom.jinja2s    |  17 +
  .../NotesRenderer/Templates/Index.jinja2s     |   2 +
  .../NotesRenderer/Templates/Math.jinja2s      |  16 +
@@ -21,7 +21,7 @@ The katex version is 0.11.1
  plasTeX/Renderers/NotesRenderer/katex.min.js  |   1 +
  plasTeX/Renderers/NotesRenderer/layout.jinja2 | 103 +++
  plasTeX/Renderers/NotesRenderer/style.css     | 631 ++++++++++++++++++
- 14 files changed, 1195 insertions(+)
+ 14 files changed, 1176 insertions(+)
  create mode 100644 plasTeX/Renderers/NotesRenderer/Config.py
  create mode 100644 plasTeX/Renderers/NotesRenderer/README.md
  create mode 100644 plasTeX/Renderers/NotesRenderer/TODO
@@ -126,39 +126,20 @@ index 0000000..0e76472
 +Style bibliography properly
 diff --git a/plasTeX/Renderers/NotesRenderer/Templates/Bibliography.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/Bibliography.jinja2s
 new file mode 100644
-index 0000000..623b66d
+index 0000000..bfe1814
 --- /dev/null
 +++ b/plasTeX/Renderers/NotesRenderer/Templates/Bibliography.jinja2s
-@@ -0,0 +1,29 @@
-+name: thebibliography
-+<dl class="bibliography">
-+{% for item in obj %}
-+  <dt><a name="{{ item.id }}">{{ item.bibcite }}</a></dt>
-+  <dd>{{ item }}</dd>
-+{% endfor %}
-+</dl>
-+
-+name: bibliographystyle
-+
-+name: bibliography
-+<div class="bibliography">
-+<h1>{{ obj.title }}</h1>
-+{{ obj }}
-+</div>
-+
+@@ -0,0 +1,10 @@
 +name: cite
 +<span class="cite">
-+{% for item in obj.citation() %}
-+  {% if item.idref and item.idref.bibitem.url %}
++{%- for item in obj.citation() -%}
++  {%- if item.idref and item.idref.bibitem.url -%}
 +  <a href="{{ item.idref.bibitem.url }}">{{ item }}</a>
-+  {% else %}
++  {%- else -%}
 +  {{ item }}
-+  {% endif %}
-+{% endfor %}
++  {%- endif -%}
++{%- endfor -%}
 +</span>
-+
-+name: bibliographyref
-+<a href="{{ obj.idref.bibitem.url }}">{{ obj }}</a>
 diff --git a/plasTeX/Renderers/NotesRenderer/Templates/Custom.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/Custom.jinja2s
 new file mode 100644
 index 0000000..cb2afee
