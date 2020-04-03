@@ -1,4 +1,4 @@
-From 32cefbefb8f349773556fc9c1fcab0cb09c09d7a Mon Sep 17 00:00:00 2001
+From e385966043ce6f44c1d804671abdb24a0a232cba Mon Sep 17 00:00:00 2001
 From: Dexter Chua <dalcde@yahoo.com.hk>
 Date: Sun, 22 Mar 2020 17:20:00 +0800
 Subject: [PATCH 3/4] Add NotesRenderer
@@ -16,12 +16,11 @@ The katex version is 0.11.1
  .../NotesRenderer/Templates/Math.jinja2s      |  16 +
  .../NotesRenderer/Templates/Thms.jinja2s      |  26 +
  .../NotesRenderer/Templates/Tikz.jinja2s      |   8 +
- .../NotesRenderer/Templates/text.jinja2s      |   5 +
  plasTeX/Renderers/NotesRenderer/__init__.py   | 288 ++++++++
  plasTeX/Renderers/NotesRenderer/katex.min.js  |   1 +
  plasTeX/Renderers/NotesRenderer/layout.jinja2 | 103 +++
  plasTeX/Renderers/NotesRenderer/style.css     | 631 ++++++++++++++++++
- 14 files changed, 1176 insertions(+)
+ 13 files changed, 1171 insertions(+)
  create mode 100644 plasTeX/Renderers/NotesRenderer/Config.py
  create mode 100644 plasTeX/Renderers/NotesRenderer/README.md
  create mode 100644 plasTeX/Renderers/NotesRenderer/TODO
@@ -31,7 +30,6 @@ The katex version is 0.11.1
  create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/Math.jinja2s
  create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/Thms.jinja2s
  create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/Tikz.jinja2s
- create mode 100644 plasTeX/Renderers/NotesRenderer/Templates/text.jinja2s
  create mode 100644 plasTeX/Renderers/NotesRenderer/__init__.py
  create mode 100644 plasTeX/Renderers/NotesRenderer/katex.min.js
  create mode 100755 plasTeX/Renderers/NotesRenderer/layout.jinja2
@@ -239,17 +237,6 @@ index 0000000..b1a6e98
 +<img src="{{ obj.image.url }}" alt="{{ obj.source|e }}" />
 +{% endif %}
 +</div>
-diff --git a/plasTeX/Renderers/NotesRenderer/Templates/text.jinja2s b/plasTeX/Renderers/NotesRenderer/Templates/text.jinja2s
-new file mode 100644
-index 0000000..8cff59e
---- /dev/null
-+++ b/plasTeX/Renderers/NotesRenderer/Templates/text.jinja2s
-@@ -0,0 +1,5 @@
-+name: textsuperscript
-+<sup>{{ obj }}</sup>
-+
-+name: textsubscript
-+<sub>{{ obj }}</sub>
 diff --git a/plasTeX/Renderers/NotesRenderer/__init__.py b/plasTeX/Renderers/NotesRenderer/__init__.py
 new file mode 100644
 index 0000000..b858974

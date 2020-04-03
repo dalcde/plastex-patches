@@ -1,4 +1,4 @@
-From c3952ff408d20677854ece9dd80de645e689394d Mon Sep 17 00:00:00 2001
+From 1762b670f12968e6d99688031f559bf0afc76dbd Mon Sep 17 00:00:00 2001
 From: Dexter Chua <dec41@srcf.net>
 Date: Sun, 21 Oct 2018 14:49:34 +0100
 Subject: [PATCH 2/4] My own changes. Again these should be upstreamed...
@@ -13,14 +13,13 @@ Subject: [PATCH 2/4] My own changes. Again these should be upstreamed...
  plasTeX/Packages/enumitem.py   |   0
  plasTeX/Packages/euscript.py   |   0
  plasTeX/Packages/footmisc.py   |   0
- plasTeX/Packages/hyperref.py   |  11 ++-
  plasTeX/Packages/microtype.py  |   0
  plasTeX/Packages/plastex.py    |  15 ++++
  plasTeX/Packages/tikz-cd.py    |  77 +-----------------
  plasTeX/Packages/tikz.py       | 142 +--------------------------------
  plasTeX/Packages/titlesec.py   |   0
  plasTeX/__init__.py            |  73 ++++++++++++++++-
- 16 files changed, 163 insertions(+), 295 deletions(-)
+ 15 files changed, 153 insertions(+), 294 deletions(-)
  create mode 100644 plasTeX/Packages/appendix.py
  create mode 100644 plasTeX/Packages/enumitem.py
  create mode 100644 plasTeX/Packages/euscript.py
@@ -131,7 +130,7 @@ index 698112e..6641c6a 100644
  
          if nargs is None:
 diff --git a/plasTeX/Imagers/dvisvgm.py b/plasTeX/Imagers/dvisvgm.py
-index b46ddc2..39ee47c 100644
+index 1b1485f..cfc6f85 100644
 --- a/plasTeX/Imagers/dvisvgm.py
 +++ b/plasTeX/Imagers/dvisvgm.py
 @@ -15,7 +15,7 @@ class DVISVGM(_Imager):
@@ -266,28 +265,6 @@ index 0000000..e69de29
 diff --git a/plasTeX/Packages/footmisc.py b/plasTeX/Packages/footmisc.py
 new file mode 100644
 index 0000000..e69de29
-diff --git a/plasTeX/Packages/hyperref.py b/plasTeX/Packages/hyperref.py
-index 07b1972..f30381a 100644
---- a/plasTeX/Packages/hyperref.py
-+++ b/plasTeX/Packages/hyperref.py
-@@ -107,7 +107,16 @@ class pdfstringdef(Command):
-     args = 'macroname:str tex:str'
- 
- class texorpdfstring(Command):
--    args = 'tex:str pdf:str'
-+    # Read the first argument, discard the second. We don't let Command.invoke
-+    # do it for us, because Command.invoke runs `digest` on the argument (the
-+    # expanded option in readArgument is set to `true`).  When we feed the
-+    # results back to the Tokenizer, the tokenizer will eventually run digest
-+    # again, which will be bad.
-+    def invoke(self, tex):
-+        output = tex.readArgument()
-+        tex.readArgument()
-+
-+        return list(output)
- 
- class pdfstringdefDisableCommands(Command):
-     args = 'tex:str'
 diff --git a/plasTeX/Packages/microtype.py b/plasTeX/Packages/microtype.py
 new file mode 100644
 index 0000000..e69de29

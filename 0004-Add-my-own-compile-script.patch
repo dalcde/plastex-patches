@@ -1,4 +1,4 @@
-From 074e60aadaf3f57932964e45d6159089203c8337 Mon Sep 17 00:00:00 2001
+From 30896c3f86b4e849fe15fce037645ccc158994bc Mon Sep 17 00:00:00 2001
 From: Dexter Chua <dalcde@yahoo.com.hk>
 Date: Sun, 22 Mar 2020 20:49:35 +0800
 Subject: [PATCH 4/4] Add my own compile script
@@ -7,12 +7,12 @@ Subject: [PATCH 4/4] Add my own compile script
  .gitignore         |  4 ++
  README.md          | 91 +++++++++++++++++++++++++---------------------
  compile_srcf       | 34 +++++++++++++++++
- plasTeX/Compile.py | 89 +++++++++++++++++++++++++++++++++++++++++++++
+ plasTeX/Compile.py | 90 +++++++++++++++++++++++++++++++++++++++++++++
  plastex.sty        |  7 ++++
  shortart.cls       | 37 +++++++++++++++++++
  shortart.py        | 27 ++++++++++++++
  tex2html           | 11 ++++++
- 8 files changed, 258 insertions(+), 42 deletions(-)
+ 8 files changed, 259 insertions(+), 42 deletions(-)
  create mode 100755 compile_srcf
  create mode 100644 plasTeX/Compile.py
  create mode 100644 plastex.sty
@@ -33,7 +33,7 @@ index d5f6f35..e065a99 100644
 +*.bbl
 +sources
 diff --git a/README.md b/README.md
-index c1c07f1..68bc39f 100644
+index 39adb62..68bc39f 100644
 --- a/README.md
 +++ b/README.md
 @@ -1,44 +1,51 @@
@@ -121,7 +121,7 @@ index c1c07f1..68bc39f 100644
 -
 -## Testing
 -To run the tests locally, run tox.
--This will run tests locally using python 3.5 to 3.7.
+-This will run tests locally using python 3.5 to 3.8.
 -
 -## Status
 -[![Build Status](https://travis-ci.org/plastex/plastex.svg?branch=master)](https://travis-ci.org/plastex/plastex)
@@ -172,10 +172,10 @@ index 0000000..d2a8c30
 +shutil.copy("plasTeX/Renderers/NotesRenderer/style.css", BASE_DIR)
 diff --git a/plasTeX/Compile.py b/plasTeX/Compile.py
 new file mode 100644
-index 0000000..db274e3
+index 0000000..4834fe9
 --- /dev/null
 +++ b/plasTeX/Compile.py
-@@ -0,0 +1,89 @@
+@@ -0,0 +1,90 @@
 +#!/usr/bin/env python3
 +
 +import os, shutil
@@ -221,7 +221,8 @@ index 0000000..db274e3
 +        config = config_global.copy()
 +
 +        config.set("images", "imager", "gspdfpng")
-+        config.set("images", "vector-imager", "dvisvgm")
++        config.set("images", "vector-imager", "pdf2svg")
++        config.set("images", "scale-factor", 1.4)
 +        config.set("files", "directory", tmp_dir)
 +
 +        for key, value in options.items():

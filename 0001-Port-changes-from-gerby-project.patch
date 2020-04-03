@@ -1,4 +1,4 @@
-From 1ea774657f5953ce13eeae7719fba940ef922118 Mon Sep 17 00:00:00 2001
+From 7d0ef97b64de608b69e6f57e8591ffc5d48da1f4 Mon Sep 17 00:00:00 2001
 From: Dexter Chua <dalcde@yahoo.com.hk>
 Date: Sun, 22 Mar 2020 16:46:15 +0800
 Subject: [PATCH 1/4] Port changes from gerby-project
@@ -211,7 +211,7 @@ index 0a9d554..e763ab6 100644
      pass
  
 diff --git a/plasTeX/Renderers/__init__.py b/plasTeX/Renderers/__init__.py
-index 04630f0..823c900 100644
+index 279a372..381b0a9 100644
 --- a/plasTeX/Renderers/__init__.py
 +++ b/plasTeX/Renderers/__init__.py
 @@ -206,7 +206,9 @@ class Renderable(object):
