@@ -1,4 +1,4 @@
-From 5282b6deb279839111f6475461f846f54e5c84ab Mon Sep 17 00:00:00 2001
+From 8e2b5a29c316375a3b8f70a4e01cc3ca31d10004 Mon Sep 17 00:00:00 2001
 From: Dexter Chua <dec41@srcf.net>
 Date: Sun, 21 Oct 2018 14:49:34 +0100
 Subject: [PATCH 2/4] My own changes. Again these should be upstreamed...
@@ -6,7 +6,6 @@ Subject: [PATCH 2/4] My own changes. Again these should be upstreamed...
 ---
  plasTeX/Base/LaTeX/Verbatim.py |  73 +----------------
  plasTeX/Context.py             |   3 -
- plasTeX/Imagers/dvisvgm.py     |   2 +-
  plasTeX/Packages/amsmath.py    |  59 ++++++++++++--
  plasTeX/Packages/amsthm.py     |   3 +-
  plasTeX/Packages/appendix.py   |   0
@@ -19,7 +18,7 @@ Subject: [PATCH 2/4] My own changes. Again these should be upstreamed...
  plasTeX/Packages/tikz.py       | 142 +--------------------------------
  plasTeX/Packages/titlesec.py   |   0
  plasTeX/__init__.py            |  73 ++++++++++++++++-
- 15 files changed, 153 insertions(+), 294 deletions(-)
+ 14 files changed, 152 insertions(+), 293 deletions(-)
  create mode 100644 plasTeX/Packages/appendix.py
  create mode 100644 plasTeX/Packages/enumitem.py
  create mode 100644 plasTeX/Packages/euscript.py
@@ -129,19 +128,6 @@ index 698112e..6641c6a 100644
              macrolog.debug('redefining command "%s"', name)
  
          if nargs is None:
-diff --git a/plasTeX/Imagers/dvisvgm.py b/plasTeX/Imagers/dvisvgm.py
-index 1b1485f..cfc6f85 100644
---- a/plasTeX/Imagers/dvisvgm.py
-+++ b/plasTeX/Imagers/dvisvgm.py
-@@ -15,7 +15,7 @@ class DVISVGM(_Imager):
-         page = 1
-         while 1:
-             filename = 'img%d.svg' % page
--            rc = os.system('dvisvgm --exact --scale=1.6 --no-fonts --output=%s --page=%d images.dvi' % (filename, page))
-+            rc = os.system('dvisvgm --exact --scale=1.4 --no-fonts --output=%s --page=%d images.dvi' % (filename, page))
-             if rc:
-                 break
- 
 diff --git a/plasTeX/Packages/amsmath.py b/plasTeX/Packages/amsmath.py
 index e763ab6..948c379 100644
 --- a/plasTeX/Packages/amsmath.py
