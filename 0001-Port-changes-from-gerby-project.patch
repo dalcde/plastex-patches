@@ -1,4 +1,4 @@
-From 7d0ef97b64de608b69e6f57e8591ffc5d48da1f4 Mon Sep 17 00:00:00 2001
+From 62b3bbcbe97224d00685f8aad53397c3cf6c7565 Mon Sep 17 00:00:00 2001
 From: Dexter Chua <dalcde@yahoo.com.hk>
 Date: Sun, 22 Mar 2020 16:46:15 +0800
 Subject: [PATCH 1/4] Port changes from gerby-project
@@ -18,10 +18,8 @@ Credits: Patrick Massot, Pieter Belmans, Raymond Cheng
  plasTeX/Base/LaTeX/Verbatim.py    |  5 +----
  plasTeX/DOM/__init__.py           |  4 ++++
  plasTeX/Packages/amsmath.py       |  3 +++
- plasTeX/Renderers/__init__.py     |  4 +++-
- plasTeX/Tokenizer.py              |  1 -
  plasTeX/__init__.py               | 11 +++++++++--
- 11 files changed, 43 insertions(+), 12 deletions(-)
+ 9 files changed, 40 insertions(+), 10 deletions(-)
 
 diff --git a/plasTeX/Base/LaTeX/Accents.py b/plasTeX/Base/LaTeX/Accents.py
 index d92324f..ab82439 100644
@@ -209,33 +207,6 @@ index 0a9d554..e763ab6 100644
 +
  class cases(_AMSEquation):
      pass
- 
-diff --git a/plasTeX/Renderers/__init__.py b/plasTeX/Renderers/__init__.py
-index 279a372..381b0a9 100644
---- a/plasTeX/Renderers/__init__.py
-+++ b/plasTeX/Renderers/__init__.py
-@@ -206,7 +206,9 @@ class Renderable(object):
- 
-                 status.info(' ] ')
- 
--                continue
-+                # only continue when it is not supposed to propagate to output higher up
-+                if "propagate" not in child.userdata or not child.userdata["propagate"]:
-+                    continue
- 
-             # Append the resultant object to the output
-             s.append(val)
-diff --git a/plasTeX/Tokenizer.py b/plasTeX/Tokenizer.py
-index 2f87362..71f87fc 100644
---- a/plasTeX/Tokenizer.py
-+++ b/plasTeX/Tokenizer.py
-@@ -29,7 +29,6 @@ DEFAULT_CATEGORIES = [
- VERBATIM_CATEGORIES = [''] * 16
- VERBATIM_CATEGORIES[11] = encoding.stringletters()
- 
--
- class Token(Text):
-     """ Base class for all TeX tokens """
  
 diff --git a/plasTeX/__init__.py b/plasTeX/__init__.py
 index 3c4ff22..87f7e1a 100644
