@@ -1,24 +1,22 @@
-From 8e2b5a29c316375a3b8f70a4e01cc3ca31d10004 Mon Sep 17 00:00:00 2001
+From 8ce1e7355ef8081dca20dc39f36b6c540d3b4751 Mon Sep 17 00:00:00 2001
 From: Dexter Chua <dec41@srcf.net>
 Date: Sun, 21 Oct 2018 14:49:34 +0100
 Subject: [PATCH 2/4] My own changes. Again these should be upstreamed...
 
 ---
- plasTeX/Base/LaTeX/Verbatim.py |  73 +----------------
- plasTeX/Context.py             |   3 -
- plasTeX/Packages/amsmath.py    |  59 ++++++++++++--
- plasTeX/Packages/amsthm.py     |   3 +-
- plasTeX/Packages/appendix.py   |   0
- plasTeX/Packages/enumitem.py   |   0
- plasTeX/Packages/euscript.py   |   0
- plasTeX/Packages/footmisc.py   |   0
- plasTeX/Packages/microtype.py  |   0
- plasTeX/Packages/plastex.py    |  15 ++++
- plasTeX/Packages/tikz-cd.py    |  77 +-----------------
- plasTeX/Packages/tikz.py       | 142 +--------------------------------
- plasTeX/Packages/titlesec.py   |   0
- plasTeX/__init__.py            |  73 ++++++++++++++++-
- 14 files changed, 152 insertions(+), 293 deletions(-)
+ plasTeX/Context.py            |   3 -
+ plasTeX/Packages/amsmath.py   |  59 ++++++++++++--
+ plasTeX/Packages/amsthm.py    |   3 +-
+ plasTeX/Packages/appendix.py  |   0
+ plasTeX/Packages/enumitem.py  |   0
+ plasTeX/Packages/euscript.py  |   0
+ plasTeX/Packages/footmisc.py  |   0
+ plasTeX/Packages/microtype.py |   0
+ plasTeX/Packages/plastex.py   |  15 ++++
+ plasTeX/Packages/tikz-cd.py   |  77 +-----------------
+ plasTeX/Packages/tikz.py      | 142 +---------------------------------
+ plasTeX/Packages/titlesec.py  |   0
+ 12 files changed, 77 insertions(+), 222 deletions(-)
  create mode 100644 plasTeX/Packages/appendix.py
  create mode 100644 plasTeX/Packages/enumitem.py
  create mode 100644 plasTeX/Packages/euscript.py
@@ -27,93 +25,6 @@ Subject: [PATCH 2/4] My own changes. Again these should be upstreamed...
  create mode 100644 plasTeX/Packages/plastex.py
  create mode 100644 plasTeX/Packages/titlesec.py
 
-diff --git a/plasTeX/Base/LaTeX/Verbatim.py b/plasTeX/Base/LaTeX/Verbatim.py
-index 6d6b189..ea20f5a 100644
---- a/plasTeX/Base/LaTeX/Verbatim.py
-+++ b/plasTeX/Base/LaTeX/Verbatim.py
-@@ -4,79 +4,12 @@
- C.6.4 Verbatim
- 
- """
--
--from plasTeX import Environment, Command, sourceArguments, sourceChildren
-+from plasTeX import VerbatimEnvironment, Command, sourceArguments, sourceChildren
- from plasTeX.Base.TeX.Text import bgroup
- from plasTeX.Tokenizer import Other
- 
--
--class verbatim(Environment):
--    blockType = True
--    captionable = True
--    doCharSubs = False
--
--    def invoke(self, tex):
--        r""" Parse until we reach `\end{verbatim}' or `\endverbatim' """
--        if self.macroMode == Environment.MODE_END:
--            return
--
--        escape = self.ownerDocument.context.categories[0][0]
--        bgroup = self.ownerDocument.context.categories[1][0]
--        egroup = self.ownerDocument.context.categories[2][0]
--        self.ownerDocument.context.push(self)
--        self.parse(tex)
--        self.ownerDocument.context.setVerbatimCatcodes()
--        tokens = [self]
--
--        # Should the end environment be expanded?
--        expand = True
--
--        # Get the name of the currently expanding environment
--        name = self.nodeName
--        if self.macroMode != Environment.MODE_NONE:
--            if self.ownerDocument.context.currenvir is not None:
--                name = self.ownerDocument.context.currenvir
--
--        # If we were invoke by a \begin{...} look for an \end{...}
--        endpattern = list(r'%send%s%s%s' % (escape, bgroup, name, egroup))
--
--        # If we were invoked as a command (i.e. \verbatim) look
--        # for an end without groupings (i.e. \endverbatim)
--        endpattern2 = list(r'%send%s' % (escape, name))
--
--        endlength = len(endpattern)
--        endlength2 = len(endpattern2)
--        # Iterate through tokens until the endpattern is found
--        for tok in tex:
--            tokens.append(tok)
--            if len(tokens) >= endlength:
--                if tokens[-endlength:] == endpattern:
--                    tokens = tokens[:-endlength]
--                    self.ownerDocument.context.pop(self)
--                    # Expand the end of the macro
--                    end = self.ownerDocument.createElement(name)
--                    end.parentNode = self.parentNode
--                    end.macroMode = Environment.MODE_END
--                    res = end.invoke(tex)
--                    if res is None:
--                        res = [end]
--                    tex.pushTokens(res)
--                    break
--            if len(tokens) >= endlength2:
--                if tokens[-endlength2:] == endpattern2:
--                    tokens = tokens[:-endlength2]
--                    self.ownerDocument.context.pop(self)
--                    # Expand the end of the macro
--                    end = self.ownerDocument.createElement(name)
--                    end.parentNode = self.parentNode
--                    end.macroMode = Environment.MODE_END
--                    res = end.invoke(tex)
--                    if res is None:
--                        res = [end]
--                    tex.pushTokens(res)
--                    break
--
--        return tokens
-+class verbatim(VerbatimEnvironment):
-+    pass
- 
- class endverbatim(verbatim):
-     def invoke(self, tex):
 diff --git a/plasTeX/Context.py b/plasTeX/Context.py
 index 698112e..6641c6a 100644
 --- a/plasTeX/Context.py
@@ -509,97 +420,6 @@ index 98b5402..df8c96d 100644
 diff --git a/plasTeX/Packages/titlesec.py b/plasTeX/Packages/titlesec.py
 new file mode 100644
 index 0000000..e69de29
-diff --git a/plasTeX/__init__.py b/plasTeX/__init__.py
-index 87f7e1a..5d74f37 100644
---- a/plasTeX/__init__.py
-+++ b/plasTeX/__init__.py
-@@ -920,7 +920,6 @@ class Environment(Macro):
-         if dopars:
-             self.paragraphs()
- 
--
- class NoCharSubEnvironment(Environment):
-     """
-     A subclass of Environment which prevents character substitution inside
-@@ -942,6 +941,78 @@ class NoCharSubEnvironment(Environment):
-             doc.charsubs = self.charsubs
-         super(NoCharSubEnvironment, self).invoke(tex)
- 
-+class VerbatimEnvironment(Environment):
-+    """
-+    A subclass of Environment that prevents processing of the contents. Useful for the verbatim environment and content that is intended to be parsed by imager.
-+    """
-+
-+    blockType = True
-+    captionable = True
-+    doCharSubs = False
-+
-+    def invoke(self, tex):
-+        r""" Parse until we reach `\end{verbatim}' or `\endverbatim' """
-+        if self.macroMode == Environment.MODE_END:
-+            return
-+
-+        escape = self.ownerDocument.context.categories[0][0]
-+        bgroup = self.ownerDocument.context.categories[1][0]
-+        egroup = self.ownerDocument.context.categories[2][0]
-+        self.ownerDocument.context.push(self)
-+        self.parse(tex)
-+        self.ownerDocument.context.setVerbatimCatcodes()
-+        tokens = [self]
-+
-+        # Should the end environment be expanded?
-+        expand = True
-+
-+        # Get the name of the currently expanding environment
-+        name = self.nodeName
-+        if self.macroMode != Environment.MODE_NONE:
-+            if self.ownerDocument.context.currenvir is not None:
-+                name = self.ownerDocument.context.currenvir
-+
-+        # If we were invoke by a \begin{...} look for an \end{...}
-+        endpattern = list(r'%send%s%s%s' % (escape, bgroup, name, egroup))
-+
-+        # If we were invoked as a command (i.e. \verbatim) look
-+        # for an end without groupings (i.e. \endverbatim)
-+        endpattern2 = list(r'%send%s' % (escape, name))
-+
-+        endlength = len(endpattern)
-+        endlength2 = len(endpattern2)
-+        # Iterate through tokens until the endpattern is found
-+        for tok in tex:
-+            tokens.append(tok)
-+            if len(tokens) >= endlength:
-+                if tokens[-endlength:] == endpattern:
-+                    tokens = tokens[:-endlength]
-+                    self.ownerDocument.context.pop(self)
-+                    # Expand the end of the macro
-+                    end = self.ownerDocument.createElement(name)
-+                    end.parentNode = self.parentNode
-+                    end.macroMode = Environment.MODE_END
-+                    res = end.invoke(tex)
-+                    if res is None:
-+                        res = [end]
-+                    tex.pushTokens(res)
-+                    break
-+            if len(tokens) >= endlength2:
-+                if tokens[-endlength2:] == endpattern2:
-+                    tokens = tokens[:-endlength2]
-+                    self.ownerDocument.context.pop(self)
-+                    # Expand the end of the macro
-+                    end = self.ownerDocument.createElement(name)
-+                    end.parentNode = self.parentNode
-+                    end.macroMode = Environment.MODE_END
-+                    res = end.invoke(tex)
-+                    if res is None:
-+                        res = [end]
-+                    tex.pushTokens(res)
-+                    break
-+
-+        return tokens
-+
- class IgnoreCommand(Command):
-     """
-     This command will be parsed, but will not go to the output stream
 -- 
 2.26.0
 
