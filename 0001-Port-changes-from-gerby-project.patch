@@ -1,4 +1,4 @@
-From 2a7315896ec335deb4bd3ababcf128bb3b02f458 Mon Sep 17 00:00:00 2001
+From 7f95e18e95ea3cd68d6222e1570ad426ea8077d6 Mon Sep 17 00:00:00 2001
 From: Dexter Chua <dalcde@yahoo.com.hk>
 Date: Sun, 22 Mar 2020 16:46:15 +0800
 Subject: [PATCH 1/4] Port changes from gerby-project
@@ -10,15 +10,13 @@ Date: 2020-03-22
 
 Credits: Patrick Massot, Pieter Belmans, Raymond Cheng
 ---
- plasTeX/Base/LaTeX/Accents.py     |  4 ++++
- plasTeX/Base/LaTeX/Arrays.py      |  2 +-
- plasTeX/Base/LaTeX/Definitions.py |  5 +++--
- plasTeX/Base/LaTeX/Index.py       |  3 ++-
- plasTeX/Base/LaTeX/Math.py        | 13 +++++++++++++
- plasTeX/DOM/__init__.py           |  4 ++++
- plasTeX/Packages/amsmath.py       |  3 +++
- plasTeX/__init__.py               | 11 +++++++++--
- 8 files changed, 39 insertions(+), 6 deletions(-)
+ plasTeX/Base/LaTeX/Accents.py     | 4 ++++
+ plasTeX/Base/LaTeX/Arrays.py      | 2 +-
+ plasTeX/Base/LaTeX/Definitions.py | 5 +++--
+ plasTeX/Base/LaTeX/Index.py       | 3 ++-
+ plasTeX/Base/LaTeX/Math.py        | 6 ++++++
+ plasTeX/__init__.py               | 8 ++++++--
+ 6 files changed, 22 insertions(+), 6 deletions(-)
 
 diff --git a/plasTeX/Base/LaTeX/Accents.py b/plasTeX/Base/LaTeX/Accents.py
 index d92324f..ab82439 100644
@@ -93,49 +91,10 @@ index 320a1bb..8865602 100644
  
  class IndexEntry(object):
 diff --git a/plasTeX/Base/LaTeX/Math.py b/plasTeX/Base/LaTeX/Math.py
-index d32c71f..14a018c 100644
+index d32c71f..e5ee41f 100644
 --- a/plasTeX/Base/LaTeX/Math.py
 +++ b/plasTeX/Base/LaTeX/Math.py
-@@ -38,6 +38,7 @@ class ThinSpace_(Command):
- 
- class MathEnvironment(Environment):
-     mathMode = True
-+    doCharSubs = False
- 
- class MathEnvironmentPre(MathEnvironment):
-     """
-@@ -111,6 +112,7 @@ class EqnarrayStar(Array):
-     macroName = 'eqnarray*'
-     blockType = True
-     mathMode = True
-+    doCharSubs = False
- 
-     class lefteqn(Command):
-         args = 'self'
-@@ -125,10 +127,14 @@ class EqnarrayStar(Array):
-             return res
- 
-     class ArrayCell(Array.ArrayCell):
-+        doCharSubs = False
-         @property
-         def source(self):
-             return '$\\displaystyle %s $' % sourceChildren(self, par=False)
- 
-+    class ArrayRow(Array.ArrayRow):
-+        doCharSubs = False
-+
- class eqnarray(EqnarrayStar):
-     macroName = None
-     counter = 'equation'
-@@ -226,6 +232,7 @@ class ddots(Command):
- #
- 
- class MathSymbol(Command):
-+    doCharSubs = False
-     pass
- 
- # Lowercase
-@@ -632,6 +639,9 @@ class stackrel(MathAccent):
+@@ -632,6 +632,9 @@ class stackrel(MathAccent):
  class mathrm(Command):
      args = 'self'
  
@@ -145,7 +104,7 @@ index d32c71f..14a018c 100644
  class mathit(Command):
      args = 'self'
  
-@@ -653,6 +663,9 @@ class boldmath(Command):
+@@ -653,6 +656,9 @@ class boldmath(Command):
  class unboldmath(Command):
      pass
  
@@ -155,50 +114,11 @@ index d32c71f..14a018c 100644
  # Math Style
  
  class displaystyle(Command):
-diff --git a/plasTeX/DOM/__init__.py b/plasTeX/DOM/__init__.py
-index afe747d..19dc6b9 100644
---- a/plasTeX/DOM/__init__.py
-+++ b/plasTeX/DOM/__init__.py
-@@ -1070,6 +1070,10 @@ class Node(object):
- 
-         """
-         charsubs = charsubs or []
-+
-+        if not getattr(self, "doCharSubs", True) or self.ownerDocument.context.isMathMode:
-+            charsubs = []
-+
-         if self.hasAttributes():
-             for value in list(self.attributes.values()):
-                 if isinstance(value, Node):
-diff --git a/plasTeX/Packages/amsmath.py b/plasTeX/Packages/amsmath.py
-index 0a9d554..e763ab6 100644
---- a/plasTeX/Packages/amsmath.py
-+++ b/plasTeX/Packages/amsmath.py
-@@ -60,6 +60,9 @@ class EquationStar(_AMSEquationStar):
- class aligned(_AMSEquation):
-     pass
- 
-+class gathered(MathEnvironmentPre):
-+    pass
-+
- class cases(_AMSEquation):
-     pass
- 
 diff --git a/plasTeX/__init__.py b/plasTeX/__init__.py
-index 3d3731e..7908ca7 100644
+index 3d3731e..4bb90ff 100644
 --- a/plasTeX/__init__.py
 +++ b/plasTeX/__init__.py
-@@ -143,6 +143,9 @@ class Macro(Element):
-     # Force there to be at least on paragraph in the content
-     forcePars = False
- 
-+    # Whether or not to perform character substitutions
-+    doCharSubs = True
-+
-     def persist(self, attrs=None):
-         """
-         Store attributes needed for cross-document links
-@@ -608,6 +611,10 @@ class Macro(Element):
+@@ -608,6 +608,10 @@ class Macro(Element):
                  macroargs.append(Argument('*modifier*', index, {'spec':item}))
                  index += 1
  
@@ -209,7 +129,7 @@ index 3d3731e..7908ca7 100644
              # Optional equals
              elif item in '=':
                  argdict.clear()
-@@ -788,7 +795,6 @@ class TeXDocument(Document):
+@@ -788,7 +792,6 @@ class TeXDocument(Document):
          ('"`', chr(8222)),
          ('"\'', chr(8220)),
          ('`', chr(8216)),
@@ -217,7 +137,7 @@ index 3d3731e..7908ca7 100644
          ('---', chr(8212)),
          ('--', chr(8211)),
  #       ('fj', unichr(58290)),
-@@ -1641,6 +1647,7 @@ class TheCounter(Command):
+@@ -1641,6 +1644,7 @@ class TheCounter(Command):
          # In this case, whenever a counter value comes out as a zero,
          # just hank it out.  This is especially useful in document classes
          # such as book and report which do this in the \thefigure format macro.
