@@ -1,4 +1,4 @@
-From d3a47adccb8c1bebc02072358cb682c3b7543fc0 Mon Sep 17 00:00:00 2001
+From 8574a3e1bc62363c7bb90508704a63d72f797176 Mon Sep 17 00:00:00 2001
 From: Dexter Chua <dalcde@yahoo.com.hk>
 Date: Sun, 22 Mar 2020 16:46:15 +0800
 Subject: [PATCH 1/4] Port changes from gerby-project
@@ -13,9 +13,8 @@ Credits: Patrick Massot, Pieter Belmans, Raymond Cheng
  plasTeX/Base/LaTeX/Accents.py     | 4 ++++
  plasTeX/Base/LaTeX/Arrays.py      | 2 +-
  plasTeX/Base/LaTeX/Definitions.py | 5 +++--
- plasTeX/Base/LaTeX/Index.py       | 3 ++-
  plasTeX/__init__.py               | 8 ++++++--
- 5 files changed, 16 insertions(+), 6 deletions(-)
+ 4 files changed, 14 insertions(+), 5 deletions(-)
 
 diff --git a/plasTeX/Base/LaTeX/Accents.py b/plasTeX/Base/LaTeX/Accents.py
 index d92324f..ab82439 100644
@@ -68,27 +67,6 @@ index ea64af8..1e4d896 100644
      args ='[caption]'
  
      def digest(self, tokens):
-diff --git a/plasTeX/Base/LaTeX/Index.py b/plasTeX/Base/LaTeX/Index.py
-index 320a1bb..8865602 100644
---- a/plasTeX/Base/LaTeX/Index.py
-+++ b/plasTeX/Base/LaTeX/Index.py
-@@ -279,6 +279,7 @@ class index(Command):
-     def textContent(self):
-         return ''
- 
-+"""
-     def invoke(self, tex):
-         result = Command.invoke(self, tex)
-         sortkey, key, format = [], [], []
-@@ -355,7 +356,7 @@ class index(Command):
-         userdata['index'].append(IndexEntry(key, self, sortkey, format, type))
- 
-         return result
--
-+"""
- 
- 
- class IndexEntry(object):
 diff --git a/plasTeX/__init__.py b/plasTeX/__init__.py
 index 3d3731e..4bb90ff 100644
 --- a/plasTeX/__init__.py
