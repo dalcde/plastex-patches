@@ -1,4 +1,4 @@
-From 7f95e18e95ea3cd68d6222e1570ad426ea8077d6 Mon Sep 17 00:00:00 2001
+From d3a47adccb8c1bebc02072358cb682c3b7543fc0 Mon Sep 17 00:00:00 2001
 From: Dexter Chua <dalcde@yahoo.com.hk>
 Date: Sun, 22 Mar 2020 16:46:15 +0800
 Subject: [PATCH 1/4] Port changes from gerby-project
@@ -14,9 +14,8 @@ Credits: Patrick Massot, Pieter Belmans, Raymond Cheng
  plasTeX/Base/LaTeX/Arrays.py      | 2 +-
  plasTeX/Base/LaTeX/Definitions.py | 5 +++--
  plasTeX/Base/LaTeX/Index.py       | 3 ++-
- plasTeX/Base/LaTeX/Math.py        | 6 ++++++
  plasTeX/__init__.py               | 8 ++++++--
- 6 files changed, 22 insertions(+), 6 deletions(-)
+ 5 files changed, 16 insertions(+), 6 deletions(-)
 
 diff --git a/plasTeX/Base/LaTeX/Accents.py b/plasTeX/Base/LaTeX/Accents.py
 index d92324f..ab82439 100644
@@ -90,30 +89,6 @@ index 320a1bb..8865602 100644
  
  
  class IndexEntry(object):
-diff --git a/plasTeX/Base/LaTeX/Math.py b/plasTeX/Base/LaTeX/Math.py
-index d32c71f..e5ee41f 100644
---- a/plasTeX/Base/LaTeX/Math.py
-+++ b/plasTeX/Base/LaTeX/Math.py
-@@ -632,6 +632,9 @@ class stackrel(MathAccent):
- class mathrm(Command):
-     args = 'self'
- 
-+class mathop(Command):
-+    args = 'self'
-+
- class mathit(Command):
-     args = 'self'
- 
-@@ -653,6 +656,9 @@ class boldmath(Command):
- class unboldmath(Command):
-     pass
- 
-+class text(Command):
-+    args = 'self'
-+
- # Math Style
- 
- class displaystyle(Command):
 diff --git a/plasTeX/__init__.py b/plasTeX/__init__.py
 index 3d3731e..4bb90ff 100644
 --- a/plasTeX/__init__.py
