@@ -1,20 +1,20 @@
-From 9e55891b79bd40f452a4638dd4f7d7b49ec8900e Mon Sep 17 00:00:00 2001
+From bd69d396bf38ff031f05545dac9ae95b16a124db Mon Sep 17 00:00:00 2001
 From: Dexter Chua <dalcde@yahoo.com.hk>
 Date: Sun, 22 Mar 2020 20:49:35 +0800
 Subject: [PATCH 4/4] Add my own compile script
 
 ---
- .gitignore         |  4 ++
- README.md          | 91 +++++++++++++++++++++++++---------------------
- compile_srcf       | 34 +++++++++++++++++
- plasTeX/Compile.py | 90 +++++++++++++++++++++++++++++++++++++++++++++
- plastex.sty        |  7 ++++
- shortart.cls       | 37 +++++++++++++++++++
- shortart.py        | 27 ++++++++++++++
- tex2html           | 11 ++++++
- 8 files changed, 259 insertions(+), 42 deletions(-)
+ .gitignore          |  4 ++
+ README.md           | 91 ++++++++++++++++++++++++---------------------
+ compile_srcf        | 35 +++++++++++++++++
+ plasTeX/Compile2.py | 64 +++++++++++++++++++++++++++++++
+ plastex.sty         |  7 ++++
+ shortart.cls        | 37 ++++++++++++++++++
+ shortart.py         | 27 ++++++++++++++
+ tex2html            | 12 ++++++
+ 8 files changed, 235 insertions(+), 42 deletions(-)
  create mode 100755 compile_srcf
- create mode 100644 plasTeX/Compile.py
+ create mode 100644 plasTeX/Compile2.py
  create mode 100644 plastex.sty
  create mode 100644 shortart.cls
  create mode 100644 shortart.py
@@ -132,16 +132,18 @@ index 39adb62..68bc39f 100644
 +argument is what plastex should use.
 diff --git a/compile_srcf b/compile_srcf
 new file mode 100755
-index 0000000..d2a8c30
+index 0000000..21607df
 --- /dev/null
 +++ b/compile_srcf
-@@ -0,0 +1,34 @@
+@@ -0,0 +1,35 @@
 +#!/usr/bin/env python3
 +
-+import os, sys, shutil
-+from plasTeX import Compile
++import sys, shutil
++from pathlib import Path
++from plasTeX import Compile2
++from tempfile import TemporaryDirectory
 +
-+BASE_DIR = "/home/dec41/public_html/exp/"
++BASE_DIR = Path("/home/dec41/public_html/exp/")
 +
 +options = {
 +    # Seting css-path prevents Compile.compile from copying style.css to the
@@ -155,41 +157,36 @@ index 0000000..d2a8c30
 +    "font-css-path": "/includes/fonts.css",
 +}
 +
-+dirs = os.listdir("sources")
-+for filename in dirs:
-+    base, ext = os.path.splitext(filename)
-+    path = BASE_DIR + "/" + base + "/"
-+
-+    if ext != ".tex":
++for f in Path("sources").iterdir():
++    if f.suffix != ".tex":
 +        continue
 +
++    path = BASE_DIR / f.stem
++
 +    if (len(sys.argv) > 1 or
-+          not os.path.isdir(path) or
-+          not os.path.isfile(path + "index.html") or
-+          os.path.getmtime(path + "index.html") < os.path.getmtime("sources/" + filename)):
-+        Compile.compile(os.path.join("sources", filename), path, options)
++          not path.is_dir() or
++          not (path / "index.html").is_file() or
++          (path / "index.html").stat().st_mtime < f.stat().st_mtime):
++
++        Compile2.run(f, str(path), options)
 +
 +shutil.copy("plasTeX/Renderers/NotesRenderer/style.css", BASE_DIR)
-diff --git a/plasTeX/Compile.py b/plasTeX/Compile.py
+diff --git a/plasTeX/Compile2.py b/plasTeX/Compile2.py
 new file mode 100644
-index 0000000..4834fe9
+index 0000000..5589109
 --- /dev/null
-+++ b/plasTeX/Compile.py
-@@ -0,0 +1,90 @@
++++ b/plasTeX/Compile2.py
+@@ -0,0 +1,64 @@
 +#!/usr/bin/env python3
 +
 +import os, shutil
++from pathlib import Path
 +from distutils.dir_util import copy_tree, mkpath
-+import plasTeX
-+from plasTeX.TeX import TeX
-+from plasTeX.ConfigManager import *
-+from plasTeX.Renderers.NotesRenderer import Renderer
 +from tempfile import TemporaryDirectory
 +
++from plasTeX.Compile import run as run_
 +from plasTeX.Config import config as config_base
 +from plasTeX.Renderers.NotesRenderer.Config import config as config_extra
-+
-+config_global = config_base + config_extra
 +
 +def rm_tree(d):
 +    for f in os.listdir(d):
@@ -199,73 +196,51 @@ index 0000000..4834fe9
 +        else:
 +            shutil.rmtree(f)
 +
-+def compile(filename, target_dir, options={}):
-+    filename = os.path.abspath(filename)
-+    source_dir = os.path.dirname(filename)
-+    filename = os.path.basename(filename)
++def run(f: Path, target_dir: str, options={}):
++    f = f.absolute() # We will later change directories
++    source_dir = f.parent
 +
-+    base, ext = os.path.splitext(filename)
-+    if ext != ".tex":
++    if f.suffix != ".tex":
 +        raise ValueError("{} does not have extension .tex".format(filename))
 +
-+    print("Compiling " + filename)
-+    cwd = os.getcwd()
++    print("Compiling {}".format(f.name))
 +
-+    os.chdir(source_dir)
-+
-+    # Re-define source_dir to be the full path
-+    source_dir = os.getcwd()
++    cwd = Path.cwd()
 +
 +    with TemporaryDirectory() as tmp_dir:
-+
-+        config = config_global.copy()
++        config = config_base.copy() + config_extra
 +
 +        config.set("images", "imager", "gspdfpng")
 +        config.set("images", "vector-imager", "pdf2svg")
 +        config.set("images", "scale-factor", 1.4)
++        config.set("general", "renderer", "NotesRenderer")
 +        config.set("files", "directory", tmp_dir)
 +
 +        for key, value in options.items():
 +            config.set("notes", key, value)
 +
-+        # Create document instance that output will be put into
-+        document = plasTeX.TeXDocument(config=config)
-+        document.userdata['working-dir'] = source_dir
++        os.chdir(source_dir)
 +
-+        # Instantiate the TeX processor and parse the document
-+        tex = TeX(document, myfile=filename)
-+        jobname = document.userdata['jobname'] = tex.jobname
-+
-+        # Parse the document
-+        tex.parse()
-+
-+        # Set up TEXINPUTS to include the current directory for the renderer
-+        os.environ['TEXINPUTS'] = '%s%s%s%s' % (source_dir, os.pathsep,
-+                                             os.environ.get('TEXINPUTS',''), os.pathsep)
-+
-+        # Change to specified directory to output to
-+        os.chdir(tmp_dir)
-+
-+        Renderer().render(document)
++        run_(f.name, config)
 +
 +        os.chdir(source_dir)
 +
-+        # Copy files
 +        mkpath(target_dir)
 +        rm_tree(target_dir)
 +        copy_tree(tmp_dir, target_dir)
-+        shutil.copy(filename, target_dir)
++        shutil.copy(f.name, target_dir)
 +        try:
-+            shutil.copy(base + ".pdf", target_dir)
++            shutil.copy(f.stem + ".pdf", target_dir)
 +        except OSError:
 +            pass
 +
 +        try:
-+            os.remove(base + ".paux")
++            os.remove(f.stem + ".paux")
 +        except OSError:
 +            pass
 +
 +    os.chdir(cwd)
++
 diff --git a/plastex.sty b/plastex.sty
 new file mode 100644
 index 0000000..7fdf492
@@ -357,21 +332,22 @@ index 0000000..a46fd48
 +    pass
 diff --git a/tex2html b/tex2html
 new file mode 100755
-index 0000000..fdc0c56
+index 0000000..28eba1a
 --- /dev/null
 +++ b/tex2html
-@@ -0,0 +1,11 @@
+@@ -0,0 +1,12 @@
 +#!/usr/bin/env python3
 +
 +import argparse
-+from plasTeX import Compile
++from plasTeX import Compile2
++from pathlib import Path
 +
 +parser = argparse.ArgumentParser(description="Transform tex files into pdf")
 +parser.add_argument("file", type=str, help='tex file to process')
 +parser.add_argument("output_dir", type=str, help='output directory')
 +
 +args = parser.parse_args()
-+Compile.compile(args.file, args.output_dir)
++Compile2.run(Path(args.file), args.output_dir)
 -- 
 2.26.0
 
