@@ -1,24 +1,22 @@
-From 0a6b385e71feb582260701d64a9df476988ade68 Mon Sep 17 00:00:00 2001
+From a87b16a58c9b9a98dc9faabe3d83c3eba8b86f96 Mon Sep 17 00:00:00 2001
 From: Dexter Chua <dalcde@yahoo.com.hk>
 Date: Sun, 22 Mar 2020 20:49:35 +0800
 Subject: [PATCH 4/4] Add my own compile script
 
 ---
- .gitignore          |  4 ++
- README.md           | 91 ++++++++++++++++++++++++---------------------
- compile_srcf        | 35 +++++++++++++++++
- plasTeX/Compile2.py | 61 ++++++++++++++++++++++++++++++
- plastex.sty         |  7 ++++
- shortart.cls        | 37 ++++++++++++++++++
- shortart.py         | 27 ++++++++++++++
- tex2html            | 12 ++++++
- 8 files changed, 232 insertions(+), 42 deletions(-)
+ .gitignore   |  4 +++
+ README.md    | 91 ++++++++++++++++++++++++++++------------------------
+ compile_srcf | 34 ++++++++++++++++++++
+ plastex.sty  |  7 ++++
+ shortart.cls | 37 +++++++++++++++++++++
+ shortart.py  | 27 ++++++++++++++++
+ tex2html.py  | 70 ++++++++++++++++++++++++++++++++++++++++
+ 7 files changed, 228 insertions(+), 42 deletions(-)
  create mode 100755 compile_srcf
- create mode 100644 plasTeX/Compile2.py
  create mode 100644 plastex.sty
  create mode 100644 shortart.cls
  create mode 100644 shortart.py
- create mode 100755 tex2html
+ create mode 100755 tex2html.py
 
 diff --git a/.gitignore b/.gitignore
 index d5f6f35..e065a99 100644
@@ -132,16 +130,15 @@ index 39adb62..68bc39f 100644
 +argument is what plastex should use.
 diff --git a/compile_srcf b/compile_srcf
 new file mode 100755
-index 0000000..21607df
+index 0000000..a4a5003
 --- /dev/null
 +++ b/compile_srcf
-@@ -0,0 +1,35 @@
+@@ -0,0 +1,34 @@
 +#!/usr/bin/env python3
 +
 +import sys, shutil
 +from pathlib import Path
-+from plasTeX import Compile2
-+from tempfile import TemporaryDirectory
++from tex2html import run
 +
 +BASE_DIR = Path("/home/dec41/public_html/exp/")
 +
@@ -168,76 +165,9 @@ index 0000000..21607df
 +          not (path / "index.html").is_file() or
 +          (path / "index.html").stat().st_mtime < f.stat().st_mtime):
 +
-+        Compile2.run(f, str(path), options)
++        run(f, str(path), options)
 +
 +shutil.copy("plasTeX/Renderers/NotesRenderer/style.css", BASE_DIR)
-diff --git a/plasTeX/Compile2.py b/plasTeX/Compile2.py
-new file mode 100644
-index 0000000..3568f58
---- /dev/null
-+++ b/plasTeX/Compile2.py
-@@ -0,0 +1,61 @@
-+#!/usr/bin/env python3
-+
-+import os, shutil
-+from pathlib import Path
-+from distutils.dir_util import copy_tree, mkpath
-+from tempfile import TemporaryDirectory
-+
-+from plasTeX.Compile import run as run_
-+from plasTeX.Config import config as config_base
-+from plasTeX.Renderers.NotesRenderer.Config import config as config_extra
-+
-+def rm_tree(d):
-+    for f in os.listdir(d):
-+        f = os.path.join(d, f)
-+        if os.path.isfile(f) or os.path.islink(f):
-+            os.unlink(f)
-+        else:
-+            shutil.rmtree(f)
-+
-+def run(f: Path, target_dir: str, options={}):
-+    f = f.absolute() # We will later change directories
-+    source_dir = f.parent
-+
-+    if f.suffix != ".tex":
-+        raise ValueError("{} does not have extension .tex".format(filename))
-+
-+    print("Compiling {}".format(f.name))
-+
-+    cwd = Path.cwd()
-+    os.chdir(source_dir)
-+
-+    with TemporaryDirectory() as tmp_dir:
-+        config = config_base.copy() + config_extra
-+
-+        config.set("images", "imager", "gspdfpng")
-+        config.set("images", "vector-imager", "pdf2svg")
-+        config.set("images", "scale-factor", 1.4)
-+        config.set("general", "renderer", "NotesRenderer")
-+        config.set("files", "directory", tmp_dir)
-+
-+        for key, value in options.items():
-+            config.set("notes", key, value)
-+
-+        run_(f.name, config)
-+
-+        mkpath(target_dir)
-+        rm_tree(target_dir)
-+        copy_tree(tmp_dir, target_dir)
-+        shutil.copy(f.name, target_dir)
-+        try:
-+            shutil.copy(f.stem + ".pdf", target_dir)
-+        except OSError:
-+            pass
-+
-+        try:
-+            os.remove(f.stem + ".paux")
-+        except OSError:
-+            pass
-+
-+    os.chdir(cwd)
-+
 diff --git a/plastex.sty b/plastex.sty
 new file mode 100644
 index 0000000..7fdf492
@@ -327,24 +257,82 @@ index 0000000..a46fd48
 +
 +class separator(Command):
 +    pass
-diff --git a/tex2html b/tex2html
+diff --git a/tex2html.py b/tex2html.py
 new file mode 100755
-index 0000000..28eba1a
+index 0000000..e2901e0
 --- /dev/null
-+++ b/tex2html
-@@ -0,0 +1,12 @@
++++ b/tex2html.py
+@@ -0,0 +1,70 @@
 +#!/usr/bin/env python3
 +
 +import argparse
-+from plasTeX import Compile2
++
++import os, shutil
 +from pathlib import Path
++from distutils.dir_util import copy_tree, mkpath
++from tempfile import TemporaryDirectory
 +
-+parser = argparse.ArgumentParser(description="Transform tex files into pdf")
-+parser.add_argument("file", type=str, help='tex file to process')
-+parser.add_argument("output_dir", type=str, help='output directory')
++from plasTeX.Compile import run as run_
++from plasTeX.Config import config as config_base
++from plasTeX.Renderers.NotesRenderer.Config import config as config_extra
 +
-+args = parser.parse_args()
-+Compile2.run(Path(args.file), args.output_dir)
++def rm_tree(d):
++    for f in os.listdir(d):
++        f = os.path.join(d, f)
++        if os.path.isfile(f) or os.path.islink(f):
++            os.unlink(f)
++        else:
++            shutil.rmtree(f)
++
++def run(f: Path, target_dir: str, options={}):
++    f = f.absolute() # We will later change directories
++    source_dir = f.parent
++
++    if f.suffix != ".tex":
++        raise ValueError("{} does not have extension .tex".format(filename))
++
++    print("Compiling {}".format(f.name))
++
++    cwd = Path.cwd()
++    os.chdir(source_dir)
++
++    with TemporaryDirectory() as tmp_dir:
++        config = config_base.copy() + config_extra
++
++        config.set("images", "imager", "gspdfpng")
++        config.set("images", "vector-imager", "pdf2svg")
++        config.set("images", "scale-factor", 1.4)
++        config.set("general", "renderer", "NotesRenderer")
++        config.set("files", "directory", tmp_dir)
++
++        for key, value in options.items():
++            config.set("notes", key, value)
++
++        run_(f.name, config)
++
++        mkpath(target_dir)
++        rm_tree(target_dir)
++        copy_tree(tmp_dir, target_dir)
++        shutil.copy(f.name, target_dir)
++        try:
++            shutil.copy(f.stem + ".pdf", target_dir)
++        except OSError:
++            pass
++
++        try:
++            os.remove(f.stem + ".paux")
++        except OSError:
++            pass
++
++    os.chdir(cwd)
++
++if __name__ == "__main__":
++    parser = argparse.ArgumentParser(description="Transform tex files into pdf")
++    parser.add_argument("file", type=str, help='tex file to process')
++    parser.add_argument("output_dir", type=str, help='output directory')
++
++    args = parser.parse_args()
++    run(Path(args.file), args.output_dir)
 -- 
 2.26.0
 
