@@ -1,4 +1,4 @@
-From bd69d396bf38ff031f05545dac9ae95b16a124db Mon Sep 17 00:00:00 2001
+From 0a6b385e71feb582260701d64a9df476988ade68 Mon Sep 17 00:00:00 2001
 From: Dexter Chua <dalcde@yahoo.com.hk>
 Date: Sun, 22 Mar 2020 20:49:35 +0800
 Subject: [PATCH 4/4] Add my own compile script
@@ -7,12 +7,12 @@ Subject: [PATCH 4/4] Add my own compile script
  .gitignore          |  4 ++
  README.md           | 91 ++++++++++++++++++++++++---------------------
  compile_srcf        | 35 +++++++++++++++++
- plasTeX/Compile2.py | 64 +++++++++++++++++++++++++++++++
+ plasTeX/Compile2.py | 61 ++++++++++++++++++++++++++++++
  plastex.sty         |  7 ++++
  shortart.cls        | 37 ++++++++++++++++++
  shortart.py         | 27 ++++++++++++++
  tex2html            | 12 ++++++
- 8 files changed, 235 insertions(+), 42 deletions(-)
+ 8 files changed, 232 insertions(+), 42 deletions(-)
  create mode 100755 compile_srcf
  create mode 100644 plasTeX/Compile2.py
  create mode 100644 plastex.sty
@@ -173,10 +173,10 @@ index 0000000..21607df
 +shutil.copy("plasTeX/Renderers/NotesRenderer/style.css", BASE_DIR)
 diff --git a/plasTeX/Compile2.py b/plasTeX/Compile2.py
 new file mode 100644
-index 0000000..5589109
+index 0000000..3568f58
 --- /dev/null
 +++ b/plasTeX/Compile2.py
-@@ -0,0 +1,64 @@
+@@ -0,0 +1,61 @@
 +#!/usr/bin/env python3
 +
 +import os, shutil
@@ -206,6 +206,7 @@ index 0000000..5589109
 +    print("Compiling {}".format(f.name))
 +
 +    cwd = Path.cwd()
++    os.chdir(source_dir)
 +
 +    with TemporaryDirectory() as tmp_dir:
 +        config = config_base.copy() + config_extra
@@ -219,11 +220,7 @@ index 0000000..5589109
 +        for key, value in options.items():
 +            config.set("notes", key, value)
 +
-+        os.chdir(source_dir)
-+
 +        run_(f.name, config)
-+
-+        os.chdir(source_dir)
 +
 +        mkpath(target_dir)
 +        rm_tree(target_dir)

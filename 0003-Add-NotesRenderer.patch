@@ -1,4 +1,4 @@
-From e71381a5b79a5ba471042cff20bbef45763d0811 Mon Sep 17 00:00:00 2001
+From 9a0f3d47ecb51b7883b4d5b1012323d2f3d9fe26 Mon Sep 17 00:00:00 2001
 From: Dexter Chua <dalcde@yahoo.com.hk>
 Date: Sun, 22 Mar 2020 17:20:00 +0800
 Subject: [PATCH 3/4] Add NotesRenderer
