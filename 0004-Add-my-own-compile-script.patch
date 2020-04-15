@@ -1,4 +1,4 @@
-From 58b04717bc510ce66e672ff1d6bf98a058069de2 Mon Sep 17 00:00:00 2001
+From 7ed5e44dda557270f87dc12974538c0bb024bdae Mon Sep 17 00:00:00 2001
 From: Dexter Chua <dalcde@yahoo.com.hk>
 Date: Sun, 22 Mar 2020 20:49:35 +0800
 Subject: [PATCH 4/4] Add my own compile script
@@ -13,8 +13,8 @@ Subject: [PATCH 4/4] Add my own compile script
  plastex.sty        |  7 ++++
  shortart.cls       | 37 +++++++++++++++++++
  shortart.py        | 27 ++++++++++++++
- tex2html.py        | 76 ++++++++++++++++++++++++++++++++++++++
- 10 files changed, 272 insertions(+), 51 deletions(-)
+ tex2html.py        | 80 ++++++++++++++++++++++++++++++++++++++++
+ 10 files changed, 276 insertions(+), 51 deletions(-)
  create mode 100755 compile_srcf
  create mode 100644 plastex.sty
  create mode 100644 shortart.cls
@@ -362,10 +362,10 @@ index 0000000..a46fd48
 +    pass
 diff --git a/tex2html.py b/tex2html.py
 new file mode 100755
-index 0000000..d132b85
+index 0000000..85c231d
 --- /dev/null
 +++ b/tex2html.py
-@@ -0,0 +1,76 @@
+@@ -0,0 +1,80 @@
 +#!/usr/bin/env python3
 +
 +import argparse
@@ -381,6 +381,10 @@ index 0000000..d132b85
 +from plasTeX.Compile import run as run_
 +from plasTeX.Config import config as config_base
 +from NotesRenderer.Config import config as config_extra
++
++from plasTeX import TeXDocument
++# Remove this charsub because it breaks search
++TeXDocument.charsubs = [x for x in TeXDocument.charsubs if x[0] != "'"]
 +
 +
 +def rm_tree(d):
