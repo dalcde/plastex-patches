@@ -1,11 +1,11 @@
-From 5562eeab64094fc2d3881ea8681ef997260c1405 Mon Sep 17 00:00:00 2001
+From a0f96eaccce7006fd68d08ba0cdff01f7e47ac08 Mon Sep 17 00:00:00 2001
 From: Dexter Chua <dec41@srcf.net>
 Date: Sun, 21 Oct 2018 14:49:34 +0100
 Subject: [PATCH 2/4] My own changes. Again these should be upstreamed...
 
 ---
+ overrides/amsmath.py         |  64 ++++++++++++++++
  plasTeX/Context.py           |   3 -
- plasTeX/Packages/amsmath.py  |  59 +++++++++++++--
  plasTeX/Packages/amsthm.py   |   3 +-
  plasTeX/Packages/appendix.py |   0
  plasTeX/Packages/enumitem.py |   0
@@ -15,7 +15,8 @@ Subject: [PATCH 2/4] My own changes. Again these should be upstreamed...
  plasTeX/Packages/tikz-cd.py  |  77 +------------------
  plasTeX/Packages/tikz.py     | 142 +----------------------------------
  plasTeX/Packages/titlesec.py |   0
- 11 files changed, 76 insertions(+), 222 deletions(-)
+ 11 files changed, 86 insertions(+), 217 deletions(-)
+ create mode 100644 overrides/amsmath.py
  create mode 100644 plasTeX/Packages/appendix.py
  create mode 100644 plasTeX/Packages/enumitem.py
  create mode 100644 plasTeX/Packages/euscript.py
@@ -23,6 +24,76 @@ Subject: [PATCH 2/4] My own changes. Again these should be upstreamed...
  create mode 100644 plasTeX/Packages/plastex.py
  create mode 100644 plasTeX/Packages/titlesec.py
 
+diff --git a/overrides/amsmath.py b/overrides/amsmath.py
+new file mode 100644
+index 0000000..1f29e3e
+--- /dev/null
++++ b/overrides/amsmath.py
+@@ -0,0 +1,64 @@
++#!/usr/bin/env python
++
++from plasTeX import Command, Environment
++from plasTeX.Base.LaTeX.Math import MathEnvironment
++
++from plasTeX.Packages.amsmath import *
++
++class AlignStar(MathEnvironment):
++    macroName = 'align*'
++
++    def invoke(self, tex):
++        if self.macroMode == Command.MODE_BEGIN:
++            o = self.ownerDocument.createElement('displaymath')
++            o.macroMode = Command.MODE_BEGIN
++            self.ownerDocument.context.push(o)
++
++            p = self.ownerDocument.createElement('aligned')
++            p.macroMode = Command.MODE_BEGIN
++            self.ownerDocument.context.push(p)
++
++            return [o, p]
++
++        elif self.macroMode == Command.MODE_END:
++            p = self.ownerDocument.createElement('aligned')
++            p.macroMode = Command.MODE_END
++            self.ownerDocument.context.push(p)
++
++            o = self.ownerDocument.createElement('displaymath')
++            o.macroMode = Command.MODE_END
++            self.ownerDocument.context.push(o)
++
++            return [p, o]
++
++class GatherStar(MathEnvironment):
++    macroName = 'gather*'
++
++    def invoke(self, tex):
++        if self.macroMode == Command.MODE_BEGIN:
++            o = self.ownerDocument.createElement('displaymath')
++            o.macroMode = Command.MODE_BEGIN
++            self.ownerDocument.context.push(o)
++
++            p = self.ownerDocument.createElement('gathered')
++            p.macroMode = Command.MODE_BEGIN
++            self.ownerDocument.context.push(p)
++
++            return [o, p]
++
++        elif self.macroMode == Command.MODE_END:
++            p = self.ownerDocument.createElement('gathered')
++            p.macroMode = Command.MODE_END
++            self.ownerDocument.context.push(p)
++
++            o = self.ownerDocument.createElement('displaymath')
++            o.macroMode = Command.MODE_END
++            self.ownerDocument.context.push(o)
++
++            return [p, o]
++
++class aligned(Environment):
++    pass
++
++class gathered(Environment):
++    pass
 diff --git a/plasTeX/Context.py b/plasTeX/Context.py
 index 698112e..6641c6a 100644
 --- a/plasTeX/Context.py
@@ -37,99 +108,6 @@ index 698112e..6641c6a 100644
              macrolog.debug('redefining command "%s"', name)
  
          if nargs is None:
-diff --git a/plasTeX/Packages/amsmath.py b/plasTeX/Packages/amsmath.py
-index 0a9d554..005de05 100644
---- a/plasTeX/Packages/amsmath.py
-+++ b/plasTeX/Packages/amsmath.py
-@@ -1,10 +1,10 @@
- #!/usr/bin/env python
- 
--from plasTeX import Command
-+from plasTeX import Command, Environment
- from plasTeX.Base.LaTeX.Arrays import Array
- from plasTeX.Base.LaTeX.Math import EqnarrayStar, eqnarray
- #### Imports Added by Tim ####
--from plasTeX.Base.LaTeX.Math import math, MathEnvironmentPre
-+from plasTeX.Base.LaTeX.Math import math, MathEnvironmentPre, MathEnvironment
- 
- from plasTeX import Tokenizer
- from plasTeX.Logging import getLogger
-@@ -23,15 +23,61 @@ class _AMSEquationStar(EqnarrayStar):
- class align(_AMSEquation):
-     pass
- 
--class AlignStar(_AMSEquationStar):
-+class AlignStar(MathEnvironment):
-     macroName = 'align*'
- 
-+    def invoke(self, tex):
-+        if self.macroMode == Command.MODE_BEGIN:
-+            o = self.ownerDocument.createElement('displaymath')
-+            o.macroMode = Command.MODE_BEGIN
-+            self.ownerDocument.context.push(o)
-+
-+            p = self.ownerDocument.createElement('aligned')
-+            p.macroMode = Command.MODE_BEGIN
-+            self.ownerDocument.context.push(p)
-+
-+            return [o, p]
-+
-+        elif self.macroMode == Command.MODE_END:
-+            p = self.ownerDocument.createElement('aligned')
-+            p.macroMode = Command.MODE_END
-+            self.ownerDocument.context.push(p)
-+
-+            o = self.ownerDocument.createElement('displaymath')
-+            o.macroMode = Command.MODE_END
-+            self.ownerDocument.context.push(o)
-+
-+            return [p, o]
-+
- class gather(_AMSEquation):
-     pass
- 
--class GatherStar(_AMSEquationStar):
-+class GatherStar(MathEnvironment):
-     macroName = 'gather*'
- 
-+    def invoke(self, tex):
-+        if self.macroMode == Command.MODE_BEGIN:
-+            o = self.ownerDocument.createElement('displaymath')
-+            o.macroMode = Command.MODE_BEGIN
-+            self.ownerDocument.context.push(o)
-+
-+            p = self.ownerDocument.createElement('gathered')
-+            p.macroMode = Command.MODE_BEGIN
-+            self.ownerDocument.context.push(p)
-+
-+            return [o, p]
-+
-+        elif self.macroMode == Command.MODE_END:
-+            p = self.ownerDocument.createElement('gathered')
-+            p.macroMode = Command.MODE_END
-+            self.ownerDocument.context.push(p)
-+
-+            o = self.ownerDocument.createElement('displaymath')
-+            o.macroMode = Command.MODE_END
-+            self.ownerDocument.context.push(o)
-+
-+            return [p, o]
-+
- class falign(_AMSEquation):
-     pass
- 
-@@ -57,7 +103,10 @@ class split(_AMSEquation):
- class EquationStar(_AMSEquationStar):
-     macroName = 'equation*'
- 
--class aligned(_AMSEquation):
-+class aligned(Environment):
-+    pass
-+
-+class gathered(Environment):
-     pass
- 
- class cases(_AMSEquation):
 diff --git a/plasTeX/Packages/amsthm.py b/plasTeX/Packages/amsthm.py
 index 981550a..b549a3d 100755
 --- a/plasTeX/Packages/amsthm.py
@@ -415,5 +393,5 @@ diff --git a/plasTeX/Packages/titlesec.py b/plasTeX/Packages/titlesec.py
 new file mode 100644
 index 0000000..e69de29
 -- 
-2.26.0
+2.26.1
 

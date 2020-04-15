@@ -1,4 +1,4 @@
-From a87b16a58c9b9a98dc9faabe3d83c3eba8b86f96 Mon Sep 17 00:00:00 2001
+From 24db23dc4bf73bcaf378677a0dfaee47c99331d6 Mon Sep 17 00:00:00 2001
 From: Dexter Chua <dalcde@yahoo.com.hk>
 Date: Sun, 22 Mar 2020 20:49:35 +0800
 Subject: [PATCH 4/4] Add my own compile script
@@ -10,8 +10,8 @@ Subject: [PATCH 4/4] Add my own compile script
  plastex.sty  |  7 ++++
  shortart.cls | 37 +++++++++++++++++++++
  shortart.py  | 27 ++++++++++++++++
- tex2html.py  | 70 ++++++++++++++++++++++++++++++++++++++++
- 7 files changed, 228 insertions(+), 42 deletions(-)
+ tex2html.py  | 74 ++++++++++++++++++++++++++++++++++++++++++
+ 7 files changed, 232 insertions(+), 42 deletions(-)
  create mode 100755 compile_srcf
  create mode 100644 plastex.sty
  create mode 100644 shortart.cls
@@ -259,22 +259,26 @@ index 0000000..a46fd48
 +    pass
 diff --git a/tex2html.py b/tex2html.py
 new file mode 100755
-index 0000000..e2901e0
+index 0000000..e5cb82c
 --- /dev/null
 +++ b/tex2html.py
-@@ -0,0 +1,70 @@
+@@ -0,0 +1,74 @@
 +#!/usr/bin/env python3
 +
 +import argparse
 +
-+import os, shutil
++import sys
 +from pathlib import Path
++sys.path.append(str(Path(__file__).absolute().parent / "overrides"))
++
++import os, shutil
 +from distutils.dir_util import copy_tree, mkpath
 +from tempfile import TemporaryDirectory
 +
 +from plasTeX.Compile import run as run_
 +from plasTeX.Config import config as config_base
 +from plasTeX.Renderers.NotesRenderer.Config import config as config_extra
++
 +
 +def rm_tree(d):
 +    for f in os.listdir(d):
@@ -334,5 +338,5 @@ index 0000000..e2901e0
 +    args = parser.parse_args()
 +    run(Path(args.file), args.output_dir)
 -- 
-2.26.0
+2.26.1
 
