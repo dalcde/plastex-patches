@@ -1,4 +1,4 @@
-From 09a0fbdb8a5bcd296d202e476d4d1652ac804918 Mon Sep 17 00:00:00 2001
+From e4b2179514b1d3dd8355d1036a47d2b0c7a16fa1 Mon Sep 17 00:00:00 2001
 From: Dexter Chua <dalcde@yahoo.com.hk>
 Date: Sun, 22 Mar 2020 16:46:15 +0800
 Subject: [PATCH 1/4] Port changes from gerby-project
@@ -11,10 +11,9 @@ Date: 2020-03-22
 Credits: Patrick Massot, Pieter Belmans, Raymond Cheng
 ---
  plasTeX/Base/LaTeX/Accents.py     | 4 ++++
- plasTeX/Base/LaTeX/Arrays.py      | 2 +-
  plasTeX/Base/LaTeX/Definitions.py | 5 +++--
- plasTeX/__init__.py               | 7 ++++++-
- 4 files changed, 14 insertions(+), 4 deletions(-)
+ plasTeX/__init__.py               | 3 ++-
+ 3 files changed, 9 insertions(+), 3 deletions(-)
 
 diff --git a/plasTeX/Base/LaTeX/Accents.py b/plasTeX/Base/LaTeX/Accents.py
 index d92324f..ab82439 100644
@@ -31,19 +30,6 @@ index d92324f..ab82439 100644
      @property    
      def textContent(self):
          """
-diff --git a/plasTeX/Base/LaTeX/Arrays.py b/plasTeX/Base/LaTeX/Arrays.py
-index caa855c..509dbfa 100644
---- a/plasTeX/Base/LaTeX/Arrays.py
-+++ b/plasTeX/Base/LaTeX/Arrays.py
-@@ -92,7 +92,7 @@ class Array(Environment):
-     class EndRow(Command):
-         """ End of a row """
-         macroName = '\\'
--        args = '* [ space ]'
-+        args = '[ ! space ]'
- 
-         def invoke(self, tex):
-             # Pop and push a new context for each row, this keeps
 diff --git a/plasTeX/Base/LaTeX/Definitions.py b/plasTeX/Base/LaTeX/Definitions.py
 index ea64af8..1e4d896 100644
 --- a/plasTeX/Base/LaTeX/Definitions.py
@@ -68,21 +54,10 @@ index ea64af8..1e4d896 100644
  
      def digest(self, tokens):
 diff --git a/plasTeX/__init__.py b/plasTeX/__init__.py
-index 3d3731e..f8d7565 100644
+index 3d3731e..2a66ffb 100644
 --- a/plasTeX/__init__.py
 +++ b/plasTeX/__init__.py
-@@ -608,6 +608,10 @@ class Macro(Element):
-                 macroargs.append(Argument('*modifier*', index, {'spec':item}))
-                 index += 1
- 
-+            # Do not strip leading whitespace
-+            elif item in '!':
-+                argdict['stripLeadingWhitespace'] = False
-+
-             # Optional equals
-             elif item in '=':
-                 argdict.clear()
-@@ -1641,6 +1645,7 @@ class TheCounter(Command):
+@@ -1641,6 +1641,7 @@ class TheCounter(Command):
          # In this case, whenever a counter value comes out as a zero,
          # just hank it out.  This is especially useful in document classes
          # such as book and report which do this in the \thefigure format macro.
