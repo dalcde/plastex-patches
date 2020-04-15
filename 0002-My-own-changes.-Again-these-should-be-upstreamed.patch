@@ -1,12 +1,12 @@
-From a0f96eaccce7006fd68d08ba0cdff01f7e47ac08 Mon Sep 17 00:00:00 2001
+From 85a2bfad2ecae349c5b49025dd4baa12f08a7392 Mon Sep 17 00:00:00 2001
 From: Dexter Chua <dec41@srcf.net>
 Date: Sun, 21 Oct 2018 14:49:34 +0100
 Subject: [PATCH 2/4] My own changes. Again these should be upstreamed...
 
 ---
  overrides/amsmath.py         |  64 ++++++++++++++++
+ overrides/amsthm.py          |   1 +
  plasTeX/Context.py           |   3 -
- plasTeX/Packages/amsthm.py   |   3 +-
  plasTeX/Packages/appendix.py |   0
  plasTeX/Packages/enumitem.py |   0
  plasTeX/Packages/euscript.py |   0
@@ -15,8 +15,9 @@ Subject: [PATCH 2/4] My own changes. Again these should be upstreamed...
  plasTeX/Packages/tikz-cd.py  |  77 +------------------
  plasTeX/Packages/tikz.py     | 142 +----------------------------------
  plasTeX/Packages/titlesec.py |   0
- 11 files changed, 86 insertions(+), 217 deletions(-)
+ 11 files changed, 85 insertions(+), 216 deletions(-)
  create mode 100644 overrides/amsmath.py
+ create mode 100644 overrides/amsthm.py
  create mode 100644 plasTeX/Packages/appendix.py
  create mode 100644 plasTeX/Packages/enumitem.py
  create mode 100644 plasTeX/Packages/euscript.py
@@ -94,6 +95,13 @@ index 0000000..1f29e3e
 +
 +class gathered(Environment):
 +    pass
+diff --git a/overrides/amsthm.py b/overrides/amsthm.py
+new file mode 100644
+index 0000000..a783648
+--- /dev/null
++++ b/overrides/amsthm.py
+@@ -0,0 +1 @@
++# Empty implementation because built in one is broken
 diff --git a/plasTeX/Context.py b/plasTeX/Context.py
 index 698112e..6641c6a 100644
 --- a/plasTeX/Context.py
@@ -108,24 +116,6 @@ index 698112e..6641c6a 100644
              macrolog.debug('redefining command "%s"', name)
  
          if nargs is None:
-diff --git a/plasTeX/Packages/amsthm.py b/plasTeX/Packages/amsthm.py
-index 981550a..b549a3d 100755
---- a/plasTeX/Packages/amsthm.py
-+++ b/plasTeX/Packages/amsthm.py
-@@ -121,6 +121,7 @@ Example document:
- 
- """
- 
-+"""
- import plasTeX
- 
- 
-@@ -281,4 +282,4 @@ class theoremCommand(plasTeX.Environment):
-         elif self.macroMode == self.MODE_END:
-             self.ownerDocument.context.pop(self)
-             return
--
-+"""
 diff --git a/plasTeX/Packages/appendix.py b/plasTeX/Packages/appendix.py
 new file mode 100644
 index 0000000..e69de29
