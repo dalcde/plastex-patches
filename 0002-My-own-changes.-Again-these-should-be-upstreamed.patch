@@ -1,29 +1,29 @@
-From 85a2bfad2ecae349c5b49025dd4baa12f08a7392 Mon Sep 17 00:00:00 2001
+From 1d5b13105f0a458d3bdf279eb1d3f8d3b3acb806 Mon Sep 17 00:00:00 2001
 From: Dexter Chua <dec41@srcf.net>
 Date: Sun, 21 Oct 2018 14:49:34 +0100
 Subject: [PATCH 2/4] My own changes. Again these should be upstreamed...
 
 ---
- overrides/amsmath.py         |  64 ++++++++++++++++
- overrides/amsthm.py          |   1 +
- plasTeX/Context.py           |   3 -
- plasTeX/Packages/appendix.py |   0
- plasTeX/Packages/enumitem.py |   0
- plasTeX/Packages/euscript.py |   0
- plasTeX/Packages/footmisc.py |   0
- plasTeX/Packages/plastex.py  |  14 ++++
- plasTeX/Packages/tikz-cd.py  |  77 +------------------
- plasTeX/Packages/tikz.py     | 142 +----------------------------------
- plasTeX/Packages/titlesec.py |   0
+ overrides/amsmath.py        |  64 ++++++++++++++++
+ overrides/amsthm.py         |   1 +
+ overrides/appendix.py       |   0
+ overrides/enumitem.py       |   0
+ overrides/euscript.py       |   0
+ overrides/footmisc.py       |   0
+ overrides/plastex.py        |  14 ++++
+ overrides/titlesec.py       |   0
+ plasTeX/Context.py          |   3 -
+ plasTeX/Packages/tikz-cd.py |  77 +------------------
+ plasTeX/Packages/tikz.py    | 142 +-----------------------------------
  11 files changed, 85 insertions(+), 216 deletions(-)
  create mode 100644 overrides/amsmath.py
  create mode 100644 overrides/amsthm.py
- create mode 100644 plasTeX/Packages/appendix.py
- create mode 100644 plasTeX/Packages/enumitem.py
- create mode 100644 plasTeX/Packages/euscript.py
- create mode 100644 plasTeX/Packages/footmisc.py
- create mode 100644 plasTeX/Packages/plastex.py
- create mode 100644 plasTeX/Packages/titlesec.py
+ create mode 100644 overrides/appendix.py
+ create mode 100644 overrides/enumitem.py
+ create mode 100644 overrides/euscript.py
+ create mode 100644 overrides/footmisc.py
+ create mode 100644 overrides/plastex.py
+ create mode 100644 overrides/titlesec.py
 
 diff --git a/overrides/amsmath.py b/overrides/amsmath.py
 new file mode 100644
@@ -102,37 +102,23 @@ index 0000000..a783648
 +++ b/overrides/amsthm.py
 @@ -0,0 +1 @@
 +# Empty implementation because built in one is broken
-diff --git a/plasTeX/Context.py b/plasTeX/Context.py
-index 698112e..6641c6a 100644
---- a/plasTeX/Context.py
-+++ b/plasTeX/Context.py
-@@ -941,9 +941,6 @@ class Context(object):
-         """
-         # Macro already exists
-         if name in list(self.keys()):
--            if not issubclass(self[name], (plasTeX.NewCommand, plasTeX.Definition)):
--                if not issubclass(self[name], plasTeX.TheCounter):
--                    return
-             macrolog.debug('redefining command "%s"', name)
- 
-         if nargs is None:
-diff --git a/plasTeX/Packages/appendix.py b/plasTeX/Packages/appendix.py
+diff --git a/overrides/appendix.py b/overrides/appendix.py
 new file mode 100644
 index 0000000..e69de29
-diff --git a/plasTeX/Packages/enumitem.py b/plasTeX/Packages/enumitem.py
+diff --git a/overrides/enumitem.py b/overrides/enumitem.py
 new file mode 100644
 index 0000000..e69de29
-diff --git a/plasTeX/Packages/euscript.py b/plasTeX/Packages/euscript.py
+diff --git a/overrides/euscript.py b/overrides/euscript.py
 new file mode 100644
 index 0000000..e69de29
-diff --git a/plasTeX/Packages/footmisc.py b/plasTeX/Packages/footmisc.py
+diff --git a/overrides/footmisc.py b/overrides/footmisc.py
 new file mode 100644
 index 0000000..e69de29
-diff --git a/plasTeX/Packages/plastex.py b/plasTeX/Packages/plastex.py
+diff --git a/overrides/plastex.py b/overrides/plastex.py
 new file mode 100644
 index 0000000..35f4df1
 --- /dev/null
-+++ b/plasTeX/Packages/plastex.py
++++ b/overrides/plastex.py
 @@ -0,0 +1,14 @@
 +from plasTeX import Command, VerbatimEnvironment
 +
@@ -148,6 +134,23 @@ index 0000000..35f4df1
 +        tex.readArgument()
 +        _, source = tex.readArgumentAndSource()
 +        self.html = source[1:-1]
+diff --git a/overrides/titlesec.py b/overrides/titlesec.py
+new file mode 100644
+index 0000000..e69de29
+diff --git a/plasTeX/Context.py b/plasTeX/Context.py
+index 698112e..6641c6a 100644
+--- a/plasTeX/Context.py
++++ b/plasTeX/Context.py
+@@ -941,9 +941,6 @@ class Context(object):
+         """
+         # Macro already exists
+         if name in list(self.keys()):
+-            if not issubclass(self[name], (plasTeX.NewCommand, plasTeX.Definition)):
+-                if not issubclass(self[name], plasTeX.TheCounter):
+-                    return
+             macrolog.debug('redefining command "%s"', name)
+ 
+         if nargs is None:
 diff --git a/plasTeX/Packages/tikz-cd.py b/plasTeX/Packages/tikz-cd.py
 index 797672b..70fd6fb 100644
 --- a/plasTeX/Packages/tikz-cd.py
@@ -379,9 +382,6 @@ index 98b5402..df8c96d 100644
 -    document.addPackageResource(cb)
 +class tikzpicture(VerbatimEnvironment):
 +    pass
-diff --git a/plasTeX/Packages/titlesec.py b/plasTeX/Packages/titlesec.py
-new file mode 100644
-index 0000000..e69de29
 -- 
 2.26.1
 
