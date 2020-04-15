@@ -1,21 +1,21 @@
-From 951ef322d4d1b00417444b314052f270286eae64 Mon Sep 17 00:00:00 2001
+From 80e7d834a40a0c99076a0d9a351076b74abaef0c Mon Sep 17 00:00:00 2001
 From: Dexter Chua <dec41@srcf.net>
 Date: Sun, 21 Oct 2018 14:49:34 +0100
 Subject: [PATCH 2/4] My own changes. Again these should be upstreamed...
 
 ---
- overrides/amsmath.py        |  64 ++++++++++++++++
- overrides/amsthm.py         |   1 +
- overrides/appendix.py       |   0
- overrides/enumitem.py       |   0
- overrides/euscript.py       |   0
- overrides/footmisc.py       |   0
- overrides/plastex.py        |  14 ++++
- overrides/titlesec.py       |   0
- plasTeX/Context.py          |   3 -
- plasTeX/Packages/tikz-cd.py |  77 +------------------
- plasTeX/Packages/tikz.py    | 142 +-----------------------------------
- 11 files changed, 85 insertions(+), 216 deletions(-)
+ overrides/amsmath.py  | 64 +++++++++++++++++++++++++++++++++++++++++++
+ overrides/amsthm.py   |  1 +
+ overrides/appendix.py |  0
+ overrides/enumitem.py |  0
+ overrides/euscript.py |  0
+ overrides/footmisc.py |  0
+ overrides/plastex.py  | 14 ++++++++++
+ overrides/tikz-cd.py  |  4 +++
+ overrides/tikz.py     |  4 +++
+ overrides/titlesec.py |  0
+ plasTeX/Context.py    |  3 --
+ 11 files changed, 87 insertions(+), 3 deletions(-)
  create mode 100644 overrides/amsmath.py
  create mode 100644 overrides/amsthm.py
  create mode 100644 overrides/appendix.py
@@ -23,6 +23,8 @@ Subject: [PATCH 2/4] My own changes. Again these should be upstreamed...
  create mode 100644 overrides/euscript.py
  create mode 100644 overrides/footmisc.py
  create mode 100644 overrides/plastex.py
+ create mode 100644 overrides/tikz-cd.py
+ create mode 100644 overrides/tikz.py
  create mode 100644 overrides/titlesec.py
 
 diff --git a/overrides/amsmath.py b/overrides/amsmath.py
@@ -134,6 +136,26 @@ index 0000000..35f4df1
 +        tex.readArgument()
 +        _, source = tex.readArgumentAndSource()
 +        self.html = source[1:-1]
+diff --git a/overrides/tikz-cd.py b/overrides/tikz-cd.py
+new file mode 100644
+index 0000000..70fd6fb
+--- /dev/null
++++ b/overrides/tikz-cd.py
+@@ -0,0 +1,4 @@
++from plasTeX import VerbatimEnvironment
++
++class tikzcd(VerbatimEnvironment):
++    pass
+diff --git a/overrides/tikz.py b/overrides/tikz.py
+new file mode 100644
+index 0000000..df8c96d
+--- /dev/null
++++ b/overrides/tikz.py
+@@ -0,0 +1,4 @@
++from plasTeX import VerbatimEnvironment
++
++class tikzpicture(VerbatimEnvironment):
++    pass
 diff --git a/overrides/titlesec.py b/overrides/titlesec.py
 new file mode 100644
 index 0000000..e69de29
@@ -151,237 +173,6 @@ index 698112e..6641c6a 100644
              macrolog.debug('redefining command "%s"', name)
  
          if nargs is None:
-diff --git a/plasTeX/Packages/tikz-cd.py b/plasTeX/Packages/tikz-cd.py
-index 797672b..70fd6fb 100644
---- a/plasTeX/Packages/tikz-cd.py
-+++ b/plasTeX/Packages/tikz-cd.py
-@@ -1,75 +1,4 @@
--import os
--import tempfile
--from jinja2 import Template
--from bs4 import BeautifulSoup
-+from plasTeX import VerbatimEnvironment
- 
--from plasTeX import NoCharSubEnvironment, Command
--from plasTeX.PackageResource import PackageResource
--from plasTeX.Packages import tikz
--
--from plasTeX.Logging import getLogger
--log = getLogger()
--
--class tikzcd(NoCharSubEnvironment):
--    """
--    A tikz-cd diagram whose content will be converted in the processFileContent callback.
--    """
--
--
--    class ar(Command):
--        pass
--
--    class rar(Command):
--        pass
--
--    class lar(Command):
--        pass
--
--    class uar(Command):
--        pass
--
--    class drar(Command):
--        pass
--
--    class dar(Command):
--        pass
--
--    class dlar(Command):
--        pass
--
--    class ular(Command):
--        pass
--
--    class urar(Command):
--        pass
--
--
--def ProcessOptions(options, document):
--    """This is called when the package is loaded."""
--    
--    try:
--        with open(document.config['html5']['tikz-cd-template'], "r") as file:
--            template = file.read()
--    except IOError:
--        log.info('Using default TikZ template.')
--        template = u"\\documentclass{standalone}\n\\usepackage{tikz-cd}" + \
--                   u"\\begin{document}{{ tikzpicture }}\\end{document}"
--    document.userdata['tikzcd'] = {
--            'template': Template(template),
--            'tmp_dir': tempfile.mkdtemp(),
--            'compiler': document.config['html5']['tikz-compiler'],
--            'pdf2svg': document.config['html5']['tikz-converter'],
--            }
--
--    def convert(document, content):
--        return tikz.tikzConvert(
--                document, 
--                content, 
--                'tikzcd', 
--                'Commutative diagram')
--
--    cb = PackageResource(
--            renderers='html5',
--            key='processFileContents',
--            data=convert) 
--    document.addPackageResource(cb)
-+class tikzcd(VerbatimEnvironment):
-+    pass
-diff --git a/plasTeX/Packages/tikz.py b/plasTeX/Packages/tikz.py
-index 98b5402..df8c96d 100644
---- a/plasTeX/Packages/tikz.py
-+++ b/plasTeX/Packages/tikz.py
-@@ -1,140 +1,4 @@
--"""
--Implement the tikz package for html output.
--The original tikz and latex do most of the work and then pdf2svg (or similar
--software) turns it into a svg image.
--Needs Beautiful Soup, Jinja2, and pdf2svg or similar
--"""
-+from plasTeX import VerbatimEnvironment
- 
--import os
--import string
--import subprocess
--import shutil
--import tempfile
--from plasTeX import Environment, NoCharSubEnvironment, Macro
--from plasTeX.PackageResource import PackageResource
--
--from plasTeX.Logging import getLogger
--log = getLogger()
--
--try:
--    from jinja2 import Template
--except ImportError:
--    log.warning('Cannot find jinja2 lib. Cannot use tikz.')
--
--try:
--    from bs4 import BeautifulSoup
--except ImportError:
--    log.warning('Cannot find BeautifulSoup lib. Cannot use tikz.')
--
--
--class tikzpicture(NoCharSubEnvironment):
--    """
--    A tikz picture whose content will be converted in the processFileContent callback.
--    """
--    class matrix(Environment):
--        """
--        Avoids conflict with amsmath matrix thanks to the context stack
--        mechanism.
--        """
--
--    class draw(Macro):
--        """ Only avoids unrecognized command warning. """
--    
--    class fill(Macro):
--        """ Only avoids unrecognized command warning. """
--
--    class filldraw(Macro):
--        """ Only avoids unrecognized command warning. """
--
--    class node(Macro):
--        """ Only avoids unrecognized command warning. """
--
--    class path(Macro):
--        """ Only avoids unrecognized command warning. """
--
--    class clip(Macro):
--        """ Only avoids unrecognized command warning. """
--
--def tikzConvert(document, content, envname, placeholder):
--    tmp_dir = document.userdata[envname]['tmp_dir']
--    working_dir = document.userdata['working-dir']
--    outdir = document.config['files']['directory']
--    outdir = string.Template(outdir).substitute(
--            {'jobname': document.userdata.get('jobname', '')})
--    target_dir = os.path.join(working_dir, outdir, 'images')
--    if not os.path.isdir(target_dir):
--        os.makedirs(target_dir)
--    template = document.userdata[envname]['template']
--    compiler = document.userdata[envname]['compiler']
--    pdf2svg = document.userdata[envname]['pdf2svg']
--
--    cwd = os.getcwd()
--    os.chdir(tmp_dir)
--    soup = BeautifulSoup(content, "html.parser")
--    encoding = soup.original_encoding
--
--    envs = soup.findAll(envname)
--    for env in envs:
--        object_id = env.attrs['id']
--        basepath = os.path.join(tmp_dir, object_id)
--        texpath = basepath + '.tex'
--        pdfpath = basepath + '.pdf'
--        svgpath =  basepath + '.svg'
--
--        context = { 'tikzpicture': env.text.strip() }
--        template.stream(**context).dump(texpath, encoding)
--
--        subprocess.call([compiler, texpath])
--        subprocess.call([pdf2svg, pdfpath, svgpath])
--        destination = os.path.join(target_dir, object_id+'.svg')
--        if os.path.isfile(destination):
--            os.remove(destination)
--        shutil.move(svgpath, target_dir)
--
--        obj = soup.new_tag(
--                'object', 
--                type='image/svg+xml',
--                data='images/' + object_id + '.svg')
--        obj.string = document.context.terms.get(
--                placeholder,
--                placeholder) + '\n' + env.text.strip()
--        obj.attrs['class'] = envname
--        div = soup.new_tag('div')
--        div.attrs['class'] = envname
--        div.insert(1, obj)
--
--        env.replace_with(div)
--    os.chdir(cwd)
--    try:
--        # python2
--        result = unicode(soup)
--    except NameError:
--        # python3
--        result = str(soup)
--    return result
--
--def ProcessOptions(options, document):
--    """This is called when the package is loaded."""
--    
--    try:
--        with open(document.config['html5']['tikz-template'], "r") as file:
--            template = file.read()
--    except IOError:
--        log.info('Using default TikZ template.')
--        template = u"\\documentclass{standalone}\n\\usepackage{tikz}" + \
--                   u"\\begin{document}{{ tikzpicture }}\\end{document}"
--    document.userdata['tikzpicture'] = {
--            'template': Template(template),
--            'tmp_dir': tempfile.mkdtemp(),
--            'compiler': document.config['html5']['tikz-compiler'],
--            'pdf2svg': document.config['html5']['tikz-converter'],
--            }
--
--    def convert(document, content):
--        return tikzConvert(document, content, 'tikzpicture', 'TikZ picture')
--
--    cb = PackageResource(
--            renderers='html5',
--            key='processFileContents',
--            data=convert) 
--    document.addPackageResource(cb)
-+class tikzpicture(VerbatimEnvironment):
-+    pass
 -- 
 2.26.1
 
