@@ -1,4 +1,4 @@
-From 80e7d834a40a0c99076a0d9a351076b74abaef0c Mon Sep 17 00:00:00 2001
+From 2a6744b64cceb5c76b29c6de88075328441ac8d3 Mon Sep 17 00:00:00 2001
 From: Dexter Chua <dec41@srcf.net>
 Date: Sun, 21 Oct 2018 14:49:34 +0100
 Subject: [PATCH 2/4] My own changes. Again these should be upstreamed...
@@ -15,7 +15,8 @@ Subject: [PATCH 2/4] My own changes. Again these should be upstreamed...
  overrides/tikz.py     |  4 +++
  overrides/titlesec.py |  0
  plasTeX/Context.py    |  3 --
- 11 files changed, 87 insertions(+), 3 deletions(-)
+ plasTeX/__init__.py   |  3 +-
+ 12 files changed, 89 insertions(+), 4 deletions(-)
  create mode 100644 overrides/amsmath.py
  create mode 100644 overrides/amsthm.py
  create mode 100644 overrides/appendix.py
@@ -173,6 +174,20 @@ index 698112e..6641c6a 100644
              macrolog.debug('redefining command "%s"', name)
  
          if nargs is None:
+diff --git a/plasTeX/__init__.py b/plasTeX/__init__.py
+index 2a66ffb..54b14d5 100644
+--- a/plasTeX/__init__.py
++++ b/plasTeX/__init__.py
+@@ -421,7 +421,8 @@ class Macro(Element):
+         argSource = sourceArguments(self)
+         if not argSource:
+             argSource = ' '
+-        elif argSource[0] in encoding.stringletters():
++        elif argSource[0] in encoding.stringletters() and\
++             not (len(self.macroName) == 1 and self.macroName[0] not in encoding.stringletters()):
+             argSource = ' %s' % argSource
+         s = '%s%s%s' % (escape, name, argSource)
+ 
 -- 
 2.26.1
 
