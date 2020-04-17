@@ -1,4 +1,4 @@
-From 63e561b8187756fcb6a8cffb6840eb4dfd77e83e Mon Sep 17 00:00:00 2001
+From 41c64661c726156be8af77901c09c5cbc43979e6 Mon Sep 17 00:00:00 2001
 From: Dexter Chua <dalcde@yahoo.com.hk>
 Date: Sun, 22 Mar 2020 20:49:35 +0800
 Subject: [PATCH 4/4] Add my own compile script
@@ -7,14 +7,14 @@ Subject: [PATCH 4/4] Add my own compile script
  .gitignore         |  4 ++
  Doc/command.tex    |  3 +-
  README.md          | 91 +++++++++++++++++++++++++---------------------
- compile_srcf       | 34 +++++++++++++++++
+ compile_srcf       | 38 +++++++++++++++++++
  plasTeX/Compile.py | 37 +++++++++++++++----
  plasTeX/Config.py  |  7 +++-
  plastex.sty        |  7 ++++
  shortart.cls       | 37 +++++++++++++++++++
  shortart.py        | 27 ++++++++++++++
  tex2html.py        | 80 ++++++++++++++++++++++++++++++++++++++++
- 10 files changed, 276 insertions(+), 51 deletions(-)
+ 10 files changed, 280 insertions(+), 51 deletions(-)
  create mode 100755 compile_srcf
  create mode 100644 plastex.sty
  create mode 100644 shortart.cls
@@ -147,10 +147,10 @@ index 39adb62..68bc39f 100644
 +argument is what plastex should use.
 diff --git a/compile_srcf b/compile_srcf
 new file mode 100755
-index 0000000..71fed02
+index 0000000..e377654
 --- /dev/null
 +++ b/compile_srcf
-@@ -0,0 +1,34 @@
+@@ -0,0 +1,38 @@
 +#!/usr/bin/env python3
 +
 +import sys, shutil
@@ -170,6 +170,10 @@ index 0000000..71fed02
 +    # By default it gets it from Google directly.
 +    "font-css-path": "/includes/fonts.css",
 +}
++
++if not BASE_DIR.is_dir():
++    BASE_DIR = Path("/tmp/exp/")
++    options = {}
 +
 +for f in Path("sources").iterdir():
 +    if f.suffix != ".tex":
