@@ -1,22 +1,22 @@
-From 2a6744b64cceb5c76b29c6de88075328441ac8d3 Mon Sep 17 00:00:00 2001
+From 5b95507409f9c07b3e0cce04f8fca961a0c64c45 Mon Sep 17 00:00:00 2001
 From: Dexter Chua <dec41@srcf.net>
 Date: Sun, 21 Oct 2018 14:49:34 +0100
 Subject: [PATCH 2/4] My own changes. Again these should be upstreamed...
 
 ---
- overrides/amsmath.py  | 64 +++++++++++++++++++++++++++++++++++++++++++
+ overrides/amsmath.py  | 80 +++++++++++++++++++++++++++++++++++++++++++
  overrides/amsthm.py   |  1 +
  overrides/appendix.py |  0
  overrides/enumitem.py |  0
  overrides/euscript.py |  0
  overrides/footmisc.py |  0
- overrides/plastex.py  | 14 ++++++++++
+ overrides/plastex.py  | 14 ++++++++
  overrides/tikz-cd.py  |  4 +++
  overrides/tikz.py     |  4 +++
  overrides/titlesec.py |  0
  plasTeX/Context.py    |  3 --
  plasTeX/__init__.py   |  3 +-
- 12 files changed, 89 insertions(+), 4 deletions(-)
+ 12 files changed, 105 insertions(+), 4 deletions(-)
  create mode 100644 overrides/amsmath.py
  create mode 100644 overrides/amsthm.py
  create mode 100644 overrides/appendix.py
@@ -30,14 +30,14 @@ Subject: [PATCH 2/4] My own changes. Again these should be upstreamed...
 
 diff --git a/overrides/amsmath.py b/overrides/amsmath.py
 new file mode 100644
-index 0000000..1f29e3e
+index 0000000..9228333
 --- /dev/null
 +++ b/overrides/amsmath.py
-@@ -0,0 +1,64 @@
+@@ -0,0 +1,80 @@
 +#!/usr/bin/env python
 +
 +from plasTeX import Command, Environment
-+from plasTeX.Base.LaTeX.Math import MathEnvironment
++from plasTeX.Base.LaTeX.Math import MathEnvironment, displaymath, equation
 +
 +from plasTeX.Packages.amsmath import *
 +
@@ -98,6 +98,22 @@ index 0000000..1f29e3e
 +
 +class gathered(Environment):
 +    pass
++
++class multline(equation):
++    class NewLine(Command):
++        macroName = '\\'
++
++        def invoke(self, tex):
++            return []
++
++class MultlineStar(displaymath):
++    macroName = "multline*"
++
++    class NewLine(Command):
++        macroName = '\\'
++
++        def invoke(self, tex):
++            return []
 diff --git a/overrides/amsthm.py b/overrides/amsthm.py
 new file mode 100644
 index 0000000..a783648

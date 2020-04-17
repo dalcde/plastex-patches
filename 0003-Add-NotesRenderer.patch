@@ -1,4 +1,4 @@
-From 1615ba2c368ae43b9e7f0ec8a04b7321a54610af Mon Sep 17 00:00:00 2001
+From 8646b8045e16501b06ce03136fe1db8f51f50663 Mon Sep 17 00:00:00 2001
 From: Dexter Chua <dalcde@yahoo.com.hk>
 Date: Sun, 22 Mar 2020 17:20:00 +0800
 Subject: [PATCH 3/4] Add NotesRenderer
@@ -171,7 +171,7 @@ index 0000000..20173c3
 +{#<a name="{{ obj.id }}" id="{{ obj.id}}"></a>#}
 diff --git a/NotesRenderer/Templates/Math.jinja2s b/NotesRenderer/Templates/Math.jinja2s
 new file mode 100644
-index 0000000..dfdba50
+index 0000000..7c2f2d4
 --- /dev/null
 +++ b/NotesRenderer/Templates/Math.jinja2s
 @@ -0,0 +1,16 @@
@@ -179,13 +179,13 @@ index 0000000..dfdba50
 +{{ obj.inlineMath }}
 +
 +name: ensuremath eqnarray eqnarray* align align* gather gather* flalign flalign* \
-+      multline multline* alignat alignat* split DeclareMathOperator
++      alignat alignat* split
 +<span>{{ obj.displayMath }}</span>
 +
-+name: displaymath equation*
++name: displaymath equation* multline*
 +{{ obj.displayMath }}
 +
-+name: equation
++name: equation multline
 +<div class="equation" id="{{ obj.id }}">
 +  <span class="equation_label_spacer">( {{ obj.ref }} )</span>
 +  <div class="equation_content">{{ obj.displayMath }}</div>
