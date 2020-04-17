@@ -1,4 +1,4 @@
-From 41c64661c726156be8af77901c09c5cbc43979e6 Mon Sep 17 00:00:00 2001
+From 5fe7ec2394f6445e03fa9423d278bf14e9d0e777 Mon Sep 17 00:00:00 2001
 From: Dexter Chua <dalcde@yahoo.com.hk>
 Date: Sun, 22 Mar 2020 20:49:35 +0800
 Subject: [PATCH 4/4] Add my own compile script
@@ -147,7 +147,7 @@ index 39adb62..68bc39f 100644
 +argument is what plastex should use.
 diff --git a/compile_srcf b/compile_srcf
 new file mode 100755
-index 0000000..e377654
+index 0000000..cb328bd
 --- /dev/null
 +++ b/compile_srcf
 @@ -0,0 +1,38 @@
@@ -188,7 +188,7 @@ index 0000000..e377654
 +
 +        run(f, str(path), options)
 +
-+shutil.copy("NotesRenderer/style.css", BASE_DIR)
++shutil.copy("NotesRenderer/style.css", str(BASE_DIR))
 diff --git a/plasTeX/Compile.py b/plasTeX/Compile.py
 index 2d05be1..8f3882e 100644
 --- a/plasTeX/Compile.py
@@ -366,7 +366,7 @@ index 0000000..a46fd48
 +    pass
 diff --git a/tex2html.py b/tex2html.py
 new file mode 100755
-index 0000000..85c231d
+index 0000000..0dab1ea
 --- /dev/null
 +++ b/tex2html.py
 @@ -0,0 +1,80 @@
@@ -411,7 +411,7 @@ index 0000000..85c231d
 +    renderer = str(Path("NotesRenderer").absolute())
 +
 +    cwd = Path.cwd()
-+    os.chdir(source_dir)
++    os.chdir(str(source_dir))
 +
 +    with TemporaryDirectory() as tmp_dir:
 +        config = config_base.copy() + config_extra
@@ -441,7 +441,7 @@ index 0000000..85c231d
 +        except OSError:
 +            pass
 +
-+    os.chdir(cwd)
++    os.chdir(str(cwd))
 +
 +if __name__ == "__main__":
 +    parser = argparse.ArgumentParser(description="Transform tex files into pdf")
