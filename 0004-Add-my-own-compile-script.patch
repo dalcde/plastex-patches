@@ -1,20 +1,17 @@
-From 5fe7ec2394f6445e03fa9423d278bf14e9d0e777 Mon Sep 17 00:00:00 2001
+From cdbab6afbbc9e88cce3805148d5b578f014360b2 Mon Sep 17 00:00:00 2001
 From: Dexter Chua <dalcde@yahoo.com.hk>
 Date: Sun, 22 Mar 2020 20:49:35 +0800
 Subject: [PATCH 4/4] Add my own compile script
 
 ---
- .gitignore         |  4 ++
- Doc/command.tex    |  3 +-
- README.md          | 91 +++++++++++++++++++++++++---------------------
- compile_srcf       | 38 +++++++++++++++++++
- plasTeX/Compile.py | 37 +++++++++++++++----
- plasTeX/Config.py  |  7 +++-
- plastex.sty        |  7 ++++
- shortart.cls       | 37 +++++++++++++++++++
- shortart.py        | 27 ++++++++++++++
- tex2html.py        | 80 ++++++++++++++++++++++++++++++++++++++++
- 10 files changed, 280 insertions(+), 51 deletions(-)
+ .gitignore   |  4 +++
+ README.md    | 91 ++++++++++++++++++++++++++++------------------------
+ compile_srcf | 38 ++++++++++++++++++++++
+ plastex.sty  |  7 ++++
+ shortart.cls | 37 +++++++++++++++++++++
+ shortart.py  | 27 ++++++++++++++++
+ tex2html.py  | 80 +++++++++++++++++++++++++++++++++++++++++++++
+ 7 files changed, 242 insertions(+), 42 deletions(-)
  create mode 100755 compile_srcf
  create mode 100644 plastex.sty
  create mode 100644 shortart.cls
@@ -22,31 +19,17 @@ Subject: [PATCH 4/4] Add my own compile script
  create mode 100755 tex2html.py
 
 diff --git a/.gitignore b/.gitignore
-index d5f6f35..e065a99 100644
+index 85d728c..35bb130 100644
 --- a/.gitignore
 +++ b/.gitignore
-@@ -72,3 +72,7 @@ Doc/plastex.pdf
- Doc/plastex.toc
- Doc/plastex/
- Doc/plastex6.syn
+@@ -76,3 +76,7 @@ Doc/plastex6.syn
+ # pytest artifacts
+ unittests/**/new/*
+ unittests/**/*.paux
 +
 +# Forked build files
 +*.bbl
 +sources
-diff --git a/Doc/command.tex b/Doc/command.tex
-index e461e0b..a991628 100644
---- a/Doc/command.tex
-+++ b/Doc/command.tex
-@@ -77,7 +77,8 @@ files and packages.
- \options{\longprogramopt{renderer=\optval{renderer-name}}}
- \config{general}{renderer}
- \default{XHTML}
--specifies which renderer to use.
-+specifies which renderer to use. This is either one of the built in renderers,
-+or a path to the directory of a renderer.
- \end{configuration}
- 
- \begin{configuration}{Themes}
 diff --git a/README.md b/README.md
 index 39adb62..68bc39f 100644
 --- a/README.md
@@ -189,92 +172,6 @@ index 0000000..cb328bd
 +        run(f, str(path), options)
 +
 +shutil.copy("NotesRenderer/style.css", str(BASE_DIR))
-diff --git a/plasTeX/Compile.py b/plasTeX/Compile.py
-index 2d05be1..8f3882e 100644
---- a/plasTeX/Compile.py
-+++ b/plasTeX/Compile.py
-@@ -3,12 +3,29 @@
- import os, sys, string, glob
- import importlib
- import plasTeX
-+from pathlib import Path
- from plasTeX.TeX import TeX
- from plasTeX.ConfigManager import *
- from plasTeX.Logging import getLogger, updateLogLevels
- 
- log = getLogger()
- 
-+def import_file(path: Path):
-+    module_name = path.name
-+    while module_name in sys.modules:
-+        module_name = module_name + "_"
-+
-+    # Using path.absolute() makes sure the __file__ property of the module is
-+    # absolute, which is important since we may change directories later.
-+    spec = importlib.util.spec_from_file_location(module_name, str(path.absolute() / "__init__.py"))
-+    if spec is None:
-+        raise ImportError
-+
-+    module = importlib.util.module_from_spec(spec)
-+    sys.modules[module_name] = module
-+    spec.loader.exec_module(module)
-+    return module
-+
- def run(filename: str, config: ConfigManager):
-     if config['logging']:
-         updateLogLevels(config['logging'])
-@@ -46,6 +63,19 @@ def run(filename: str, config: ConfigManager):
-     os.environ['TEXINPUTS'] = '%s%s%s%s' % (os.getcwd(), os.pathsep,
-                                          os.environ.get('TEXINPUTS',''), os.pathsep)
- 
-+    # Load renderer
-+    rmodule = None
-+    try:
-+        rmodule = importlib.import_module('plasTeX.Renderers.'+rname)
-+    except ImportError:
-+        pass
-+
-+    if rmodule is None:
-+        try:
-+            rmodule = import_file(Path(rname))
-+        except ImportError:
-+            raise ImportError('Could not import renderer "%s".  Make sure that it is installed correctly, and can be imported by Python.' % rname)
-+
-     # Change to specified directory to output to
-     outdir = config['files']['directory']
-     if outdir:
-@@ -55,13 +85,6 @@ def run(filename: str, config: ConfigManager):
-         log.info('Directing output files to directory: %s.' % outdir)
-         os.chdir(outdir)
- 
--    # Load renderer
--    try:
--        rmodule = importlib.import_module('plasTeX.Renderers.'+rname)
--    except ImportError as msg:
--        log.error('Could not import renderer "%s".  Make sure that it is installed correctly, and can be imported by Python.' % rname)
--        raise msg
--
-     # Write expanded source file
-     #sourcefile = '%s.source' % jobname
-     #open(sourcefile,'w').write(document.source.encode('utf-8'))
-diff --git a/plasTeX/Config.py b/plasTeX/Config.py
-index f5cbb16..c37a81a 100644
---- a/plasTeX/Config.py
-+++ b/plasTeX/Config.py
-@@ -11,7 +11,12 @@ c = config = ConfigManager()
- general = c.add_section('general')
- 
- general['renderer'] = StringOption(
--    """ Renderer to use for conversion """,
-+    """
-+    Renderer to use for conversion
-+
-+    This is either one of the built in renderers, or a path to the
-+    directory of a renderer
-+    """,
-     options = '--renderer',
-     default = 'XHTML',
- )
 diff --git a/plastex.sty b/plastex.sty
 new file mode 100644
 index 0000000..7fdf492

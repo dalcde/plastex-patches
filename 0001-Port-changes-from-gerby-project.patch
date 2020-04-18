@@ -1,4 +1,4 @@
-From a89d472b3c9bf4da8e982e37714f88d27401eac8 Mon Sep 17 00:00:00 2001
+From a9ac5bc27efa51647a5accac08c705ea27970a45 Mon Sep 17 00:00:00 2001
 From: Dexter Chua <dalcde@yahoo.com.hk>
 Date: Sun, 22 Mar 2020 16:46:15 +0800
 Subject: [PATCH 1/4] Port changes from gerby-project
@@ -38,10 +38,10 @@ index ea64af8..1e4d896 100644
  
      def digest(self, tokens):
 diff --git a/plasTeX/__init__.py b/plasTeX/__init__.py
-index 3d3731e..2a66ffb 100644
+index 4e0c821..54b14d5 100644
 --- a/plasTeX/__init__.py
 +++ b/plasTeX/__init__.py
-@@ -1641,6 +1641,7 @@ class TheCounter(Command):
+@@ -1642,6 +1642,7 @@ class TheCounter(Command):
          # In this case, whenever a counter value comes out as a zero,
          # just hank it out.  This is especially useful in document classes
          # such as book and report which do this in the \thefigure format macro.
